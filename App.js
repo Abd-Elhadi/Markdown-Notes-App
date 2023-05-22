@@ -6,10 +6,15 @@ import Split from "react-split"
 import {nanoid} from "nanoid"
 
 export default function App() {
-    const [notes, setNotes] = React.useState([])
+    const [notes, setNotes] = React.useState(() => JSON.parse(window.localStorage.getItem('notes')) || [])
     const [currentNoteId, setCurrentNoteId] = React.useState(
         (notes[0] && notes[0].id) || ""
     )
+
+
+    React.useEffect(() => {
+        localStorage.setItem("notes", JSON.stringify(notes))
+    }, [notes])
     
     function createNewNote() {
         const newNote = {
@@ -21,17 +26,30 @@ export default function App() {
     }
     
     function updateNote(text) {
-        setNotes(oldNotes => oldNotes.map(oldNote => {
-            if (oldNote.id === currentNoteId) {
-                const newNote = oldNote;
-                newNote.body = text;
-                return newNote;
-            }
-            return oldNote
-            // return oldNote.id === currentNoteId
-            //     ? { ...oldNote, body: text }
-            //     : oldNote
-        }))
+        setNotes(oldNotes => {
+            let idx;
+            let updatedNote;
+            const updatedNotes = oldNotes.map((oldNote, index) => {
+                if (oldNote.id === currentNoteId) {
+                    oldNote.body = text;
+                    updatedNote = oldNote;
+                    idx = index;
+                    return oldNote
+                }
+                return oldNote;
+            });
+            updatedNotes.splice(idx, 1);
+            updatedNotes.unshift(updatedNote);
+            return updatedNotes;
+        });
+        // setNotes(oldNotes => oldNotes.map(oldNote => {
+        //     if (oldNote.id === currentNoteId) {
+        //         const newNote = oldNote;
+        //         newNote.body = text;
+        //         return newNote;
+        //     }
+        //     return oldNote;
+        // }));
     }
     
     function findCurrentNote() {

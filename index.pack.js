@@ -63,11 +63,26 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
+/******/ 	return __webpack_require__(__webpack_require__.s = 23);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = __webpack_require__(57);
+} else {
+  module.exports = __webpack_require__(56);
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -257,7 +272,170 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 1 */
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getBreaksNeededForEmptyLineAfter = exports.getBreaksNeededForEmptyLineBefore = exports.selectWord = exports.getSurroundingWord = void 0;
+function getSurroundingWord(text, position) {
+    if (!text)
+        throw Error("Argument 'text' should be truthy");
+    var isWordDelimiter = function (c) { return c === " " || c.charCodeAt(0) === 10; };
+    // leftIndex is initialized to 0 because if selection is 0, it won't even enter the iteration
+    var start = 0;
+    // rightIndex is initialized to text.length because if selection is equal to text.length it won't even enter the interation
+    var end = text.length;
+    // iterate to the left
+    for (var i = position; i - 1 > -1; i--) {
+        if (isWordDelimiter(text[i - 1])) {
+            start = i;
+            break;
+        }
+    }
+    // iterate to the right
+    for (var i = position; i < text.length; i++) {
+        if (isWordDelimiter(text[i])) {
+            end = i;
+            break;
+        }
+    }
+    return { start: start, end: end };
+}
+exports.getSurroundingWord = getSurroundingWord;
+/**
+ * If the cursor is inside a word and (selection.start === selection.end)
+ * returns a new Selection where the whole word is selected
+ * @param text
+ * @param selection
+ */
+function selectWord(_a) {
+    var text = _a.text, selection = _a.selection;
+    if (text && text.length && selection.start === selection.end) {
+        // the user is pointing to a word
+        return getSurroundingWord(text, selection.start);
+    }
+    return selection;
+}
+exports.selectWord = selectWord;
+/**
+ *  Gets the number of line-breaks that would have to be inserted before the given 'startPosition'
+ *  to make sure there's an empty line between 'startPosition' and the previous text
+ */
+function getBreaksNeededForEmptyLineBefore(text, startPosition) {
+    if (text === void 0) { text = ""; }
+    if (startPosition === 0)
+        return 0;
+    // rules:
+    // - If we're in the first line, no breaks are needed
+    // - Otherwise there must be 2 breaks before the previous character. Depending on how many breaks exist already, we
+    //      may need to insert 0, 1 or 2 breaks
+    var neededBreaks = 2;
+    var isInFirstLine = true;
+    for (var i = startPosition - 1; i >= 0 && neededBreaks >= 0; i--) {
+        switch (text.charCodeAt(i)) {
+            case 32: // blank space
+                continue;
+            case 10: // line break
+                neededBreaks--;
+                isInFirstLine = false;
+                break;
+            default:
+                return neededBreaks;
+        }
+    }
+    return isInFirstLine ? 0 : neededBreaks;
+}
+exports.getBreaksNeededForEmptyLineBefore = getBreaksNeededForEmptyLineBefore;
+/**
+ *  Gets the number of line-breaks that would have to be inserted after the given 'startPosition'
+ *  to make sure there's an empty line between 'startPosition' and the next text
+ */
+function getBreaksNeededForEmptyLineAfter(text, startPosition) {
+    if (text === void 0) { text = ""; }
+    if (startPosition === text.length - 1)
+        return 0;
+    // rules:
+    // - If we're in the first line, no breaks are needed
+    // - Otherwise there must be 2 breaks before the previous character. Depending on how many breaks exist already, we
+    //      may need to insert 0, 1 or 2 breaks
+    var neededBreaks = 2;
+    var isInLastLine = true;
+    for (var i = startPosition; i < text.length && neededBreaks >= 0; i++) {
+        switch (text.charCodeAt(i)) {
+            case 32:
+                continue;
+            case 10: {
+                neededBreaks--;
+                isInLastLine = false;
+                break;
+            }
+            default:
+                return neededBreaks;
+        }
+    }
+    return isInLastLine ? 0 : neededBreaks;
+}
+exports.getBreaksNeededForEmptyLineAfter = getBreaksNeededForEmptyLineAfter;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*!
+  Copyright (c) 2018 Jed Watson.
+  Licensed under the MIT License (MIT), see
+  http://jedwatson.github.io/classnames
+*/
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.classNames = void 0;
+function isString(classValue) {
+    return typeof classValue === "string";
+}
+function isNonEmptyArray(classValue) {
+    return Array.isArray(classValue) && classValue.length > 0;
+}
+function isClassDictionary(classValue) {
+    return typeof classValue === "object";
+}
+function classNames() {
+    var classValues = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        classValues[_i] = arguments[_i];
+    }
+    var classes = [];
+    for (var i = 0; i < classValues.length; i++) {
+        var classValue = classValues[i];
+        if (!classValue)
+            continue;
+        if (isString(classValue)) {
+            classes.push(classValue);
+        }
+        else if (isNonEmptyArray(classValue)) {
+            var inner = classNames.apply(null, classValue);
+            if (inner) {
+                classes.push(inner);
+            }
+        }
+        else if (isClassDictionary(classValue)) {
+            for (var key in classValue) {
+                if (classValue.hasOwnProperty(key) && classValue[key]) {
+                    classes.push(key);
+                }
+            }
+        }
+    }
+    return classes.join(" ");
+}
+exports.classNames = classNames;
+
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -354,37 +532,415 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 
 
 /***/ }),
-/* 2 */
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
+
+module.exports = ReactPropTypesSecret;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getDefaultSaveImageCommandName = exports.getDefaultCommandMap = exports.getDefaultToolbarCommands = void 0;
+var headerCommand_1 = __webpack_require__(38);
+var boldCommand_1 = __webpack_require__(36);
+var italicCommand_1 = __webpack_require__(40);
+var strikeThroughCommand_1 = __webpack_require__(45);
+var linkCommand_1 = __webpack_require__(41);
+var quoteCommand_1 = __webpack_require__(43);
+var codeCommand_1 = __webpack_require__(37);
+var listCommands_1 = __webpack_require__(42);
+var imageCommand_1 = __webpack_require__(39);
+var save_image_command_1 = __webpack_require__(44);
+function getDefaultToolbarCommands() {
+    return [
+        ["header", "bold", "italic", "strikethrough"],
+        ["link", "quote", "code", "image"],
+        ["unordered-list", "ordered-list", "checked-list"]
+    ];
+}
+exports.getDefaultToolbarCommands = getDefaultToolbarCommands;
+function getDefaultCommandMap() {
+    return {
+        header: headerCommand_1.headerCommand,
+        bold: boldCommand_1.boldCommand,
+        italic: italicCommand_1.italicCommand,
+        strikethrough: strikeThroughCommand_1.strikeThroughCommand,
+        link: linkCommand_1.linkCommand,
+        quote: quoteCommand_1.quoteCommand,
+        code: codeCommand_1.codeCommand,
+        image: imageCommand_1.imageCommand,
+        "unordered-list": listCommands_1.unorderedListCommand,
+        "ordered-list": listCommands_1.orderedListCommand,
+        "checked-list": listCommands_1.checkedListCommand,
+        "save-image": save_image_command_1.saveImageCommand
+    };
+}
+exports.getDefaultCommandMap = getDefaultCommandMap;
+function getDefaultSaveImageCommandName() {
+    return "save-image";
+}
+exports.getDefaultSaveImageCommandName = getDefaultSaveImageCommandName;
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports) {
+
+module.exports = Function.call.bind(Object.prototype.hasOwnProperty);
+
+
+/***/ }),
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(10);
+  module.exports = __webpack_require__(33);
 } else {
-  module.exports = __webpack_require__(9);
+  module.exports = __webpack_require__(32);
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 3 */
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SuggestionsDropdown = void 0;
+var React = __webpack_require__(0);
+var ClassNames_1 = __webpack_require__(3);
+var SuggestionsDropdown = function (_a) {
+    var classes = _a.classes, suggestions = _a.suggestions, caret = _a.caret, onSuggestionSelected = _a.onSuggestionSelected, suggestionsAutoplace = _a.suggestionsAutoplace, focusIndex = _a.focusIndex, textAreaRef = _a.textAreaRef;
+    var handleSuggestionClick = function (event) {
+        event.preventDefault();
+        var index = parseInt(event.currentTarget.attributes["data-index"].value);
+        onSuggestionSelected(index);
+    };
+    var handleMouseDown = function (event) { return event.preventDefault(); };
+    var vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    var vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+    var left = caret.left - textAreaRef.current.scrollLeft;
+    var top = caret.top - textAreaRef.current.scrollTop;
+    var style = {};
+    if (suggestionsAutoplace &&
+        top + textAreaRef.current.getBoundingClientRect().top > vh / 2)
+        style.bottom = textAreaRef.current.offsetHeight - top;
+    else
+        style.top = top;
+    if (suggestionsAutoplace &&
+        left + textAreaRef.current.getBoundingClientRect().left > vw / 2)
+        style.right = textAreaRef.current.offsetWidth - left;
+    else
+        style.left = left;
+    return (React.createElement("ul", { className: ClassNames_1.classNames("mde-suggestions", classes), style: style }, suggestions.map(function (s, i) { return (React.createElement("li", { onClick: handleSuggestionClick, onMouseDown: handleMouseDown, key: i, "aria-selected": focusIndex === i ? "true" : "false", "data-index": "" + i }, s.preview)); })));
+};
+exports.SuggestionsDropdown = SuggestionsDropdown;
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToolbarButton = void 0;
+var React = __webpack_require__(0);
+var defaultButtonProps = {
+    tabIndex: -1
+};
+var ToolbarButton = function (props) {
+    var buttonComponentClass = props.buttonComponentClass, buttonContent = props.buttonContent, buttonProps = props.buttonProps, onClick = props.onClick, readOnly = props.readOnly, name = props.name;
+    var finalButtonProps = __assign(__assign({}, defaultButtonProps), (buttonProps || {}));
+    var finalButtonComponent = buttonComponentClass || "button";
+    return (React.createElement("li", { className: "mde-header-item" }, React.createElement(finalButtonComponent, __assign(__assign({ "data-name": name }, finalButtonProps), {
+        onClick: onClick,
+        disabled: readOnly,
+        type: "button"
+    }), buttonContent)));
+};
+exports.ToolbarButton = ToolbarButton;
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToolbarButtonGroup = void 0;
+var React = __webpack_require__(0);
+var ClassNames_1 = __webpack_require__(3);
+var ToolbarButtonGroup = function (props) {
+    return (React.createElement("ul", { className: ClassNames_1.classNames("mde-header-group", { hidden: props.hidden }) }, props.children));
+};
+exports.ToolbarButtonGroup = ToolbarButtonGroup;
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(__webpack_require__(11), exports);
+__exportStar(__webpack_require__(10), exports);
+__exportStar(__webpack_require__(13), exports);
+__exportStar(__webpack_require__(46), exports);
+__exportStar(__webpack_require__(48), exports);
+__exportStar(__webpack_require__(49), exports);
+__exportStar(__webpack_require__(47), exports);
+__exportStar(__webpack_require__(9), exports);
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MdeFontAwesomeIcon = void 0;
+var React = __webpack_require__(0);
+var MdeFontAwesomeIcon = function (_a) {
+    var icon = _a.icon;
+    var transformedIcon = icon;
+    switch (icon) {
+        case "header":
+            transformedIcon = "heading";
+            break;
+        case "quote":
+            transformedIcon = "quote-right";
+            break;
+        case "unordered-list":
+            transformedIcon = "tasks";
+            break;
+        case "ordered-list":
+            transformedIcon = "list-ol";
+            break;
+        case "checked-list":
+            transformedIcon = "tasks";
+            break;
+        default:
+            transformedIcon = icon;
+    }
+    return React.createElement("i", { className: "fas fa-" + transformedIcon, "aria-hidden": "true" });
+};
+exports.MdeFontAwesomeIcon = MdeFontAwesomeIcon;
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(__webpack_require__(13), exports);
+__exportStar(__webpack_require__(50), exports);
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getDefaultToolbarCommands = exports.getDefaultCommandMap = exports.MdeFontAwesomeIcon = exports.SvgIcon = exports.MarkdownUtil = exports.ToolbarButtonGroup = exports.Toolbar = exports.Preview = exports.SuggestionsDropdown = exports.TextArea = void 0;
+var MarkdownUtil = __webpack_require__(2);
+exports.MarkdownUtil = MarkdownUtil;
+var components_1 = __webpack_require__(12);
+Object.defineProperty(exports, "TextArea", { enumerable: true, get: function () { return components_1.TextArea; } });
+Object.defineProperty(exports, "SuggestionsDropdown", { enumerable: true, get: function () { return components_1.SuggestionsDropdown; } });
+Object.defineProperty(exports, "Preview", { enumerable: true, get: function () { return components_1.Preview; } });
+Object.defineProperty(exports, "Toolbar", { enumerable: true, get: function () { return components_1.Toolbar; } });
+Object.defineProperty(exports, "ToolbarButtonGroup", { enumerable: true, get: function () { return components_1.ToolbarButtonGroup; } });
+var icons_1 = __webpack_require__(14);
+Object.defineProperty(exports, "SvgIcon", { enumerable: true, get: function () { return icons_1.SvgIcon; } });
+Object.defineProperty(exports, "MdeFontAwesomeIcon", { enumerable: true, get: function () { return icons_1.MdeFontAwesomeIcon; } });
+var defaults_1 = __webpack_require__(6);
+Object.defineProperty(exports, "getDefaultCommandMap", { enumerable: true, get: function () { return defaults_1.getDefaultCommandMap; } });
+Object.defineProperty(exports, "getDefaultToolbarCommands", { enumerable: true, get: function () { return defaults_1.getDefaultToolbarCommands; } });
+exports.default = components_1.ReactMde;
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*!
+ * The MIT License
+   Copyright (c) 2018 Dmitriy Kubyshkin
+   Copied from https://github.com/grassator/insert-text-at-cursor
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.insertText = void 0;
+/**
+ * Inserts the given text at the cursor. If the element contains a selection, the selection
+ * will be replaced by the text.
+ */
+function insertText(input, text) {
+    // Most of the used APIs only work with the field selected
+    input.focus();
+    // IE 8-10
+    if (document.selection) {
+        var ieRange = document.selection.createRange();
+        ieRange.text = text;
+        // Move cursor after the inserted text
+        ieRange.collapse(false /* to the end */);
+        ieRange.select();
+        return;
+    }
+    // Webkit + Edge
+    var isSuccess = document.execCommand("insertText", false, text);
+    if (!isSuccess) {
+        var start = input.selectionStart;
+        var end = input.selectionEnd;
+        // Firefox (non-standard method)
+        if (typeof input.setRangeText === "function") {
+            input.setRangeText(text);
+        }
+        else {
+            if (canManipulateViaTextNodes(input)) {
+                var textNode = document.createTextNode(text);
+                var node = input.firstChild;
+                // If textarea is empty, just insert the text
+                if (!node) {
+                    input.appendChild(textNode);
+                }
+                else {
+                    // Otherwise we need to find a nodes for start and end
+                    var offset = 0;
+                    var startNode = null;
+                    var endNode = null;
+                    // To make a change we just need a Range, not a Selection
+                    var range = document.createRange();
+                    while (node && (startNode === null || endNode === null)) {
+                        var nodeLength = node.nodeValue.length;
+                        // if start of the selection falls into current node
+                        if (start >= offset && start <= offset + nodeLength) {
+                            range.setStart((startNode = node), start - offset);
+                        }
+                        // if end of the selection falls into current node
+                        if (end >= offset && end <= offset + nodeLength) {
+                            range.setEnd((endNode = node), end - offset);
+                        }
+                        offset += nodeLength;
+                        node = node.nextSibling;
+                    }
+                    // If there is some text selected, remove it as we should replace it
+                    if (start !== end) {
+                        range.deleteContents();
+                    }
+                    // Finally insert a new node. The browser will automatically
+                    // split start and end nodes into two if necessary
+                    range.insertNode(textNode);
+                }
+            }
+            else {
+                // For the text input the only way is to replace the whole value :(
+                var value = input.value;
+                input.value = value.slice(0, start) + text + value.slice(end);
+            }
+        }
+        // Correct the cursor position to be at the end of the insertion
+        input.setSelectionRange(start + text.length, start + text.length);
+        // Notify any possible listeners of the change
+        var e = document.createEvent("UIEvent");
+        e.initEvent("input", true, false);
+        input.dispatchEvent(e);
+    }
+}
+exports.insertText = insertText;
+function canManipulateViaTextNodes(input) {
+    if (input.nodeName !== "TEXTAREA") {
+        return false;
+    }
+    var browserSupportsTextareaTextNodes;
+    if (typeof browserSupportsTextareaTextNodes === "undefined") {
+        var textarea = document.createElement("textarea");
+        textarea.value = "1";
+        browserSupportsTextareaTextNodes = !!textarea.firstChild;
+    }
+    return browserSupportsTextareaTextNodes;
+}
+
+
+/***/ }),
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(14);
+  module.exports = __webpack_require__(61);
 } else {
-  module.exports = __webpack_require__(13);
+  module.exports = __webpack_require__(60);
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 4 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -398,32 +954,34 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 exports.default = App;
 
-var _react = __webpack_require__(2);
+var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _Sidebar = __webpack_require__(31);
+var _Sidebar = __webpack_require__(21);
 
 var _Sidebar2 = _interopRequireDefault(_Sidebar);
 
-var _Editor = __webpack_require__(30);
+var _Editor = __webpack_require__(20);
 
 var _Editor2 = _interopRequireDefault(_Editor);
 
-var _data = __webpack_require__(32);
+var _data = __webpack_require__(22);
 
-var _reactSplit = __webpack_require__(62);
+var _reactSplit = __webpack_require__(55);
 
 var _reactSplit2 = _interopRequireDefault(_reactSplit);
 
-var _nanoid = __webpack_require__(33);
+var _nanoid = __webpack_require__(24);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function App() {
-    var _React$useState = _react2.default.useState([]),
+    var _React$useState = _react2.default.useState(function () {
+        return JSON.parse(window.localStorage.getItem('notes')) || [];
+    }),
         _React$useState2 = _slicedToArray(_React$useState, 2),
         notes = _React$useState2[0],
         setNotes = _React$useState2[1];
@@ -432,6 +990,10 @@ function App() {
         _React$useState4 = _slicedToArray(_React$useState3, 2),
         currentNoteId = _React$useState4[0],
         setCurrentNoteId = _React$useState4[1];
+
+    _react2.default.useEffect(function () {
+        localStorage.setItem("notes", JSON.stringify(notes));
+    }, [notes]);
 
     function createNewNote() {
         var newNote = {
@@ -446,18 +1008,29 @@ function App() {
 
     function updateNote(text) {
         setNotes(function (oldNotes) {
-            return oldNotes.map(function (oldNote) {
+            var idx = void 0;
+            var updatedNote = void 0;
+            var updatedNotes = oldNotes.map(function (oldNote, index) {
                 if (oldNote.id === currentNoteId) {
-                    var newNote = oldNote;
-                    newNote.body = text;
-                    return newNote;
+                    oldNote.body = text;
+                    updatedNote = oldNote;
+                    idx = index;
+                    return oldNote;
                 }
                 return oldNote;
-                // return oldNote.id === currentNoteId
-                //     ? { ...oldNote, body: text }
-                //     : oldNote
             });
+            updatedNotes.splice(idx, 1);
+            updatedNotes.unshift(updatedNote);
+            return updatedNotes;
         });
+        // setNotes(oldNotes => oldNotes.map(oldNote => {
+        //     if (oldNote.id === currentNoteId) {
+        //         const newNote = oldNote;
+        //         newNote.body = text;
+        //         return newNote;
+        //     }
+        //     return oldNote;
+        // }));
     }
 
     function findCurrentNote() {
@@ -507,7 +1080,7 @@ function App() {
 }
 
 /***/ }),
-/* 5 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -545,29 +1118,168 @@ if (process.env.NODE_ENV === 'production') {
   // DCE check should happen before ReactDOM bundle executes so that
   // DevTools can report bad minification during injection.
   checkDCE();
-  module.exports = __webpack_require__(8);
+  module.exports = __webpack_require__(31);
 } else {
-  module.exports = __webpack_require__(7);
+  module.exports = __webpack_require__(30);
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 6 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _react = __webpack_require__(2);
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+exports.default = Editor;
+
+var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDom = __webpack_require__(5);
+var _reactMde = __webpack_require__(15);
+
+var _reactMde2 = _interopRequireDefault(_reactMde);
+
+var _showdown = __webpack_require__(63);
+
+var _showdown2 = _interopRequireDefault(_showdown);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function Editor(_ref) {
+    var currentNote = _ref.currentNote,
+        updateNote = _ref.updateNote;
+
+    var _React$useState = _react2.default.useState("write"),
+        _React$useState2 = _slicedToArray(_React$useState, 2),
+        selectedTab = _React$useState2[0],
+        setSelectedTab = _React$useState2[1];
+
+    var converter = new _showdown2.default.Converter({
+        tables: true,
+        simplifiedAutoLink: true,
+        strikethrough: true,
+        tasklists: true
+    });
+
+    return _react2.default.createElement(
+        "section",
+        { className: "pane editor" },
+        _react2.default.createElement(_reactMde2.default, {
+            value: currentNote.body,
+            onChange: updateNote,
+            selectedTab: selectedTab,
+            onTabChange: setSelectedTab,
+            generateMarkdownPreview: function generateMarkdownPreview(markdown) {
+                return Promise.resolve(converter.makeHtml(markdown));
+            },
+            minEditorHeight: 80,
+            heightUnits: "vh"
+        })
+    );
+}
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = Sidebar;
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function Sidebar(props) {
+    var noteElements = props.notes.map(function (note, index) {
+        return _react2.default.createElement(
+            "div",
+            { key: note.id },
+            _react2.default.createElement(
+                "div",
+                {
+
+                    className: "title " + (note.id === props.currentNote.id ? "selected-note" : ""),
+                    onClick: function onClick() {
+                        return props.setCurrentNoteId(note.id);
+                    }
+                },
+                _react2.default.createElement(
+                    "h4",
+                    { className: "text-snippet" },
+                    note.body.split('\n')[0]
+                )
+            )
+        );
+    });
+
+    return _react2.default.createElement(
+        "section",
+        { className: "pane sidebar" },
+        _react2.default.createElement(
+            "div",
+            { className: "sidebar--header" },
+            _react2.default.createElement(
+                "h3",
+                null,
+                "Notes"
+            ),
+            _react2.default.createElement(
+                "button",
+                { className: "new-note", onClick: props.newNote },
+                "+"
+            )
+        ),
+        noteElements
+    );
+}
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var data = exports.data = [{
+    id: 1,
+    body: "### This just in!\n\nMarkdown is an *awesome* way to write **very basic HTML** by typing manually\n\nIt can be used for:\n\n1. README files\n1. Slack and Discord messages\n1. **So much more!**\n\n---\n\nHere's a division \uD83D\uDC46"
+}, { id: 2, body: "a" }, { id: 3, body: "b" }, { id: 4, body: "c" }, { id: 5, body: "d" }, { id: 6, body: "e" }];
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = __webpack_require__(19);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _App = __webpack_require__(4);
+var _App = __webpack_require__(18);
 
 var _App2 = _interopRequireDefault(_App);
 
@@ -576,7 +1288,967 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _reactDom2.default.render(_react2.default.createElement(_App2.default, null), document.getElementById("root"));
 
 /***/ }),
-/* 7 */
+/* 24 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "nanoid", function() { return nanoid; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "customAlphabet", function() { return customAlphabet; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "customRandom", function() { return customRandom; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "random", function() { return random; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__url_alphabet_index_js__ = __webpack_require__(25);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "urlAlphabet", function() { return __WEBPACK_IMPORTED_MODULE_0__url_alphabet_index_js__["a"]; });
+// This file replaces `index.js` in bundlers like webpack or Rollup,
+// according to `browser` config in `package.json`.
+
+
+
+if (process.env.NODE_ENV !== 'production') {
+  // All bundlers will remove this block in the production bundle.
+  if (
+    typeof navigator !== 'undefined' &&
+    navigator.product === 'ReactNative' &&
+    typeof crypto === 'undefined'
+  ) {
+    throw new Error(
+      'React Native does not have a built-in secure random generator. ' +
+        'If you don’t need unpredictable IDs use `nanoid/non-secure`. ' +
+        'For secure IDs, import `react-native-get-random-values` ' +
+        'before Nano ID.'
+    )
+  }
+  if (typeof msCrypto !== 'undefined' && typeof crypto === 'undefined') {
+    throw new Error(
+      'Import file with `if (!window.crypto) window.crypto = window.msCrypto`' +
+        ' before importing Nano ID to fix IE 11 support'
+    )
+  }
+  if (typeof crypto === 'undefined') {
+    throw new Error(
+      'Your browser does not have secure random generator. ' +
+        'If you don’t need unpredictable IDs, you can use nanoid/non-secure.'
+    )
+  }
+}
+
+let random = bytes => crypto.getRandomValues(new Uint8Array(bytes))
+
+let customRandom = (alphabet, size, getRandom) => {
+  // First, a bitmask is necessary to generate the ID. The bitmask makes bytes
+  // values closer to the alphabet size. The bitmask calculates the closest
+  // `2^31 - 1` number, which exceeds the alphabet size.
+  // For example, the bitmask for the alphabet size 30 is 31 (00011111).
+  // `Math.clz32` is not used, because it is not available in browsers.
+  let mask = (2 << (Math.log(alphabet.length - 1) / Math.LN2)) - 1
+  // Though, the bitmask solution is not perfect since the bytes exceeding
+  // the alphabet size are refused. Therefore, to reliably generate the ID,
+  // the random bytes redundancy has to be satisfied.
+
+  // Note: every hardware random generator call is performance expensive,
+  // because the system call for entropy collection takes a lot of time.
+  // So, to avoid additional system calls, extra bytes are requested in advance.
+
+  // Next, a step determines how many random bytes to generate.
+  // The number of random bytes gets decided upon the ID size, mask,
+  // alphabet size, and magic number 1.6 (using 1.6 peaks at performance
+  // according to benchmarks).
+
+  // `-~f => Math.ceil(f)` if f is a float
+  // `-~i => i + 1` if i is an integer
+  let step = -~((1.6 * mask * size) / alphabet.length)
+
+  return () => {
+    let id = ''
+    while (true) {
+      let bytes = getRandom(step)
+      // A compact alternative for `for (var i = 0; i < step; i++)`.
+      let j = step
+      while (j--) {
+        // Adding `|| ''` refuses a random byte that exceeds the alphabet size.
+        id += alphabet[bytes[j] & mask] || ''
+        if (id.length === size) return id
+      }
+    }
+  }
+}
+
+let customAlphabet = (alphabet, size) => customRandom(alphabet, size, random)
+
+let nanoid = (size = 21) => {
+  let id = ''
+  let bytes = crypto.getRandomValues(new Uint8Array(size))
+
+  // A compact alternative for `for (var i = 0; i < step; i++)`.
+  while (size--) {
+    // It is incorrect to use bytes exceeding the alphabet size.
+    // The following mask reduces the random byte in the 0-255 value
+    // range to the 0-63 value range. Therefore, adding hacks, such
+    // as empty string fallback or magic numbers, is unneccessary because
+    // the bitmask trims bytes down to the alphabet size.
+    let byte = bytes[size] & 63
+    if (byte < 36) {
+      // `0-9a-z`
+      id += byte.toString(36)
+    } else if (byte < 62) {
+      // `A-Z`
+      id += (byte - 26).toString(36).toUpperCase()
+    } else if (byte < 63) {
+      id += '_'
+    } else {
+      id += '-'
+    }
+  }
+  return id
+}
+
+
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)))
+
+/***/ }),
+/* 25 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return urlAlphabet; });
+// This alphabet uses `A-Za-z0-9_-` symbols. The genetic algorithm helped
+// optimize the gzip compression for this alphabet.
+let urlAlphabet =
+  'ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW'
+
+
+
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+var printWarning = function() {};
+
+if (process.env.NODE_ENV !== 'production') {
+  var ReactPropTypesSecret = __webpack_require__(5);
+  var loggedTypeFailures = {};
+  var has = __webpack_require__(7);
+
+  printWarning = function(text) {
+    var message = 'Warning: ' + text;
+    if (typeof console !== 'undefined') {
+      console.error(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) { /**/ }
+  };
+}
+
+/**
+ * Assert that the values match with the type specs.
+ * Error messages are memorized and will only be shown once.
+ *
+ * @param {object} typeSpecs Map of name to a ReactPropType
+ * @param {object} values Runtime values that need to be type-checked
+ * @param {string} location e.g. "prop", "context", "child context"
+ * @param {string} componentName Name of the component for error messages.
+ * @param {?Function} getStack Returns the component stack.
+ * @private
+ */
+function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
+  if (process.env.NODE_ENV !== 'production') {
+    for (var typeSpecName in typeSpecs) {
+      if (has(typeSpecs, typeSpecName)) {
+        var error;
+        // Prop type validation may throw. In case they do, we don't want to
+        // fail the render phase where it didn't fail before. So we log it.
+        // After these have been cleaned up, we'll let them throw.
+        try {
+          // This is intentionally an invariant that gets caught. It's the same
+          // behavior as without this statement except with a better message.
+          if (typeof typeSpecs[typeSpecName] !== 'function') {
+            var err = Error(
+              (componentName || 'React class') + ': ' + location + ' type `' + typeSpecName + '` is invalid; ' +
+              'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.' +
+              'This often happens because of typos such as `PropTypes.function` instead of `PropTypes.func`.'
+            );
+            err.name = 'Invariant Violation';
+            throw err;
+          }
+          error = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, ReactPropTypesSecret);
+        } catch (ex) {
+          error = ex;
+        }
+        if (error && !(error instanceof Error)) {
+          printWarning(
+            (componentName || 'React class') + ': type specification of ' +
+            location + ' `' + typeSpecName + '` is invalid; the type checker ' +
+            'function must return `null` or an `Error` but returned a ' + typeof error + '. ' +
+            'You may have forgotten to pass an argument to the type checker ' +
+            'creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and ' +
+            'shape all require an argument).'
+          );
+        }
+        if (error instanceof Error && !(error.message in loggedTypeFailures)) {
+          // Only monitor this failure once because there tends to be a lot of the
+          // same error.
+          loggedTypeFailures[error.message] = true;
+
+          var stack = getStack ? getStack() : '';
+
+          printWarning(
+            'Failed ' + location + ' type: ' + error.message + (stack != null ? stack : '')
+          );
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Resets warning cache when testing.
+ *
+ * @private
+ */
+checkPropTypes.resetWarningCache = function() {
+  if (process.env.NODE_ENV !== 'production') {
+    loggedTypeFailures = {};
+  }
+}
+
+module.exports = checkPropTypes;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+var ReactPropTypesSecret = __webpack_require__(5);
+
+function emptyFunction() {}
+function emptyFunctionWithReset() {}
+emptyFunctionWithReset.resetWarningCache = emptyFunction;
+
+module.exports = function() {
+  function shim(props, propName, componentName, location, propFullName, secret) {
+    if (secret === ReactPropTypesSecret) {
+      // It is still safe when called from React.
+      return;
+    }
+    var err = new Error(
+      'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
+      'Use PropTypes.checkPropTypes() to call them. ' +
+      'Read more at http://fb.me/use-check-prop-types'
+    );
+    err.name = 'Invariant Violation';
+    throw err;
+  };
+  shim.isRequired = shim;
+  function getShim() {
+    return shim;
+  };
+  // Important!
+  // Keep this list in sync with production version in `./factoryWithTypeCheckers.js`.
+  var ReactPropTypes = {
+    array: shim,
+    bigint: shim,
+    bool: shim,
+    func: shim,
+    number: shim,
+    object: shim,
+    string: shim,
+    symbol: shim,
+
+    any: shim,
+    arrayOf: getShim,
+    element: shim,
+    elementType: shim,
+    instanceOf: getShim,
+    node: shim,
+    objectOf: getShim,
+    oneOf: getShim,
+    oneOfType: getShim,
+    shape: getShim,
+    exact: getShim,
+
+    checkPropTypes: emptyFunctionWithReset,
+    resetWarningCache: emptyFunction
+  };
+
+  ReactPropTypes.PropTypes = ReactPropTypes;
+
+  return ReactPropTypes;
+};
+
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+var ReactIs = __webpack_require__(8);
+var assign = __webpack_require__(4);
+
+var ReactPropTypesSecret = __webpack_require__(5);
+var has = __webpack_require__(7);
+var checkPropTypes = __webpack_require__(26);
+
+var printWarning = function() {};
+
+if (process.env.NODE_ENV !== 'production') {
+  printWarning = function(text) {
+    var message = 'Warning: ' + text;
+    if (typeof console !== 'undefined') {
+      console.error(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) {}
+  };
+}
+
+function emptyFunctionThatReturnsNull() {
+  return null;
+}
+
+module.exports = function(isValidElement, throwOnDirectAccess) {
+  /* global Symbol */
+  var ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
+  var FAUX_ITERATOR_SYMBOL = '@@iterator'; // Before Symbol spec.
+
+  /**
+   * Returns the iterator method function contained on the iterable object.
+   *
+   * Be sure to invoke the function with the iterable as context:
+   *
+   *     var iteratorFn = getIteratorFn(myIterable);
+   *     if (iteratorFn) {
+   *       var iterator = iteratorFn.call(myIterable);
+   *       ...
+   *     }
+   *
+   * @param {?object} maybeIterable
+   * @return {?function}
+   */
+  function getIteratorFn(maybeIterable) {
+    var iteratorFn = maybeIterable && (ITERATOR_SYMBOL && maybeIterable[ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL]);
+    if (typeof iteratorFn === 'function') {
+      return iteratorFn;
+    }
+  }
+
+  /**
+   * Collection of methods that allow declaration and validation of props that are
+   * supplied to React components. Example usage:
+   *
+   *   var Props = require('ReactPropTypes');
+   *   var MyArticle = React.createClass({
+   *     propTypes: {
+   *       // An optional string prop named "description".
+   *       description: Props.string,
+   *
+   *       // A required enum prop named "category".
+   *       category: Props.oneOf(['News','Photos']).isRequired,
+   *
+   *       // A prop named "dialog" that requires an instance of Dialog.
+   *       dialog: Props.instanceOf(Dialog).isRequired
+   *     },
+   *     render: function() { ... }
+   *   });
+   *
+   * A more formal specification of how these methods are used:
+   *
+   *   type := array|bool|func|object|number|string|oneOf([...])|instanceOf(...)
+   *   decl := ReactPropTypes.{type}(.isRequired)?
+   *
+   * Each and every declaration produces a function with the same signature. This
+   * allows the creation of custom validation functions. For example:
+   *
+   *  var MyLink = React.createClass({
+   *    propTypes: {
+   *      // An optional string or URI prop named "href".
+   *      href: function(props, propName, componentName) {
+   *        var propValue = props[propName];
+   *        if (propValue != null && typeof propValue !== 'string' &&
+   *            !(propValue instanceof URI)) {
+   *          return new Error(
+   *            'Expected a string or an URI for ' + propName + ' in ' +
+   *            componentName
+   *          );
+   *        }
+   *      }
+   *    },
+   *    render: function() {...}
+   *  });
+   *
+   * @internal
+   */
+
+  var ANONYMOUS = '<<anonymous>>';
+
+  // Important!
+  // Keep this list in sync with production version in `./factoryWithThrowingShims.js`.
+  var ReactPropTypes = {
+    array: createPrimitiveTypeChecker('array'),
+    bigint: createPrimitiveTypeChecker('bigint'),
+    bool: createPrimitiveTypeChecker('boolean'),
+    func: createPrimitiveTypeChecker('function'),
+    number: createPrimitiveTypeChecker('number'),
+    object: createPrimitiveTypeChecker('object'),
+    string: createPrimitiveTypeChecker('string'),
+    symbol: createPrimitiveTypeChecker('symbol'),
+
+    any: createAnyTypeChecker(),
+    arrayOf: createArrayOfTypeChecker,
+    element: createElementTypeChecker(),
+    elementType: createElementTypeTypeChecker(),
+    instanceOf: createInstanceTypeChecker,
+    node: createNodeChecker(),
+    objectOf: createObjectOfTypeChecker,
+    oneOf: createEnumTypeChecker,
+    oneOfType: createUnionTypeChecker,
+    shape: createShapeTypeChecker,
+    exact: createStrictShapeTypeChecker,
+  };
+
+  /**
+   * inlined Object.is polyfill to avoid requiring consumers ship their own
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
+   */
+  /*eslint-disable no-self-compare*/
+  function is(x, y) {
+    // SameValue algorithm
+    if (x === y) {
+      // Steps 1-5, 7-10
+      // Steps 6.b-6.e: +0 != -0
+      return x !== 0 || 1 / x === 1 / y;
+    } else {
+      // Step 6.a: NaN == NaN
+      return x !== x && y !== y;
+    }
+  }
+  /*eslint-enable no-self-compare*/
+
+  /**
+   * We use an Error-like object for backward compatibility as people may call
+   * PropTypes directly and inspect their output. However, we don't use real
+   * Errors anymore. We don't inspect their stack anyway, and creating them
+   * is prohibitively expensive if they are created too often, such as what
+   * happens in oneOfType() for any type before the one that matched.
+   */
+  function PropTypeError(message, data) {
+    this.message = message;
+    this.data = data && typeof data === 'object' ? data: {};
+    this.stack = '';
+  }
+  // Make `instanceof Error` still work for returned errors.
+  PropTypeError.prototype = Error.prototype;
+
+  function createChainableTypeChecker(validate) {
+    if (process.env.NODE_ENV !== 'production') {
+      var manualPropTypeCallCache = {};
+      var manualPropTypeWarningCount = 0;
+    }
+    function checkType(isRequired, props, propName, componentName, location, propFullName, secret) {
+      componentName = componentName || ANONYMOUS;
+      propFullName = propFullName || propName;
+
+      if (secret !== ReactPropTypesSecret) {
+        if (throwOnDirectAccess) {
+          // New behavior only for users of `prop-types` package
+          var err = new Error(
+            'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
+            'Use `PropTypes.checkPropTypes()` to call them. ' +
+            'Read more at http://fb.me/use-check-prop-types'
+          );
+          err.name = 'Invariant Violation';
+          throw err;
+        } else if (process.env.NODE_ENV !== 'production' && typeof console !== 'undefined') {
+          // Old behavior for people using React.PropTypes
+          var cacheKey = componentName + ':' + propName;
+          if (
+            !manualPropTypeCallCache[cacheKey] &&
+            // Avoid spamming the console because they are often not actionable except for lib authors
+            manualPropTypeWarningCount < 3
+          ) {
+            printWarning(
+              'You are manually calling a React.PropTypes validation ' +
+              'function for the `' + propFullName + '` prop on `' + componentName + '`. This is deprecated ' +
+              'and will throw in the standalone `prop-types` package. ' +
+              'You may be seeing this warning due to a third-party PropTypes ' +
+              'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.'
+            );
+            manualPropTypeCallCache[cacheKey] = true;
+            manualPropTypeWarningCount++;
+          }
+        }
+      }
+      if (props[propName] == null) {
+        if (isRequired) {
+          if (props[propName] === null) {
+            return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required ' + ('in `' + componentName + '`, but its value is `null`.'));
+          }
+          return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required in ' + ('`' + componentName + '`, but its value is `undefined`.'));
+        }
+        return null;
+      } else {
+        return validate(props, propName, componentName, location, propFullName);
+      }
+    }
+
+    var chainedCheckType = checkType.bind(null, false);
+    chainedCheckType.isRequired = checkType.bind(null, true);
+
+    return chainedCheckType;
+  }
+
+  function createPrimitiveTypeChecker(expectedType) {
+    function validate(props, propName, componentName, location, propFullName, secret) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== expectedType) {
+        // `propValue` being instance of, say, date/regexp, pass the 'object'
+        // check, but we can offer a more precise error message here rather than
+        // 'of type `object`'.
+        var preciseType = getPreciseType(propValue);
+
+        return new PropTypeError(
+          'Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'),
+          {expectedType: expectedType}
+        );
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createAnyTypeChecker() {
+    return createChainableTypeChecker(emptyFunctionThatReturnsNull);
+  }
+
+  function createArrayOfTypeChecker(typeChecker) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (typeof typeChecker !== 'function') {
+        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside arrayOf.');
+      }
+      var propValue = props[propName];
+      if (!Array.isArray(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an array.'));
+      }
+      for (var i = 0; i < propValue.length; i++) {
+        var error = typeChecker(propValue, i, componentName, location, propFullName + '[' + i + ']', ReactPropTypesSecret);
+        if (error instanceof Error) {
+          return error;
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createElementTypeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      if (!isValidElement(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createElementTypeTypeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      if (!ReactIs.isValidElementType(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement type.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createInstanceTypeChecker(expectedClass) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (!(props[propName] instanceof expectedClass)) {
+        var expectedClassName = expectedClass.name || ANONYMOUS;
+        var actualClassName = getClassName(props[propName]);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + actualClassName + '` supplied to `' + componentName + '`, expected ') + ('instance of `' + expectedClassName + '`.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createEnumTypeChecker(expectedValues) {
+    if (!Array.isArray(expectedValues)) {
+      if (process.env.NODE_ENV !== 'production') {
+        if (arguments.length > 1) {
+          printWarning(
+            'Invalid arguments supplied to oneOf, expected an array, got ' + arguments.length + ' arguments. ' +
+            'A common mistake is to write oneOf(x, y, z) instead of oneOf([x, y, z]).'
+          );
+        } else {
+          printWarning('Invalid argument supplied to oneOf, expected an array.');
+        }
+      }
+      return emptyFunctionThatReturnsNull;
+    }
+
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      for (var i = 0; i < expectedValues.length; i++) {
+        if (is(propValue, expectedValues[i])) {
+          return null;
+        }
+      }
+
+      var valuesString = JSON.stringify(expectedValues, function replacer(key, value) {
+        var type = getPreciseType(value);
+        if (type === 'symbol') {
+          return String(value);
+        }
+        return value;
+      });
+      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of value `' + String(propValue) + '` ' + ('supplied to `' + componentName + '`, expected one of ' + valuesString + '.'));
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createObjectOfTypeChecker(typeChecker) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (typeof typeChecker !== 'function') {
+        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside objectOf.');
+      }
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an object.'));
+      }
+      for (var key in propValue) {
+        if (has(propValue, key)) {
+          var error = typeChecker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+          if (error instanceof Error) {
+            return error;
+          }
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createUnionTypeChecker(arrayOfTypeCheckers) {
+    if (!Array.isArray(arrayOfTypeCheckers)) {
+      process.env.NODE_ENV !== 'production' ? printWarning('Invalid argument supplied to oneOfType, expected an instance of array.') : void 0;
+      return emptyFunctionThatReturnsNull;
+    }
+
+    for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
+      var checker = arrayOfTypeCheckers[i];
+      if (typeof checker !== 'function') {
+        printWarning(
+          'Invalid argument supplied to oneOfType. Expected an array of check functions, but ' +
+          'received ' + getPostfixForTypeWarning(checker) + ' at index ' + i + '.'
+        );
+        return emptyFunctionThatReturnsNull;
+      }
+    }
+
+    function validate(props, propName, componentName, location, propFullName) {
+      var expectedTypes = [];
+      for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
+        var checker = arrayOfTypeCheckers[i];
+        var checkerResult = checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret);
+        if (checkerResult == null) {
+          return null;
+        }
+        if (checkerResult.data && has(checkerResult.data, 'expectedType')) {
+          expectedTypes.push(checkerResult.data.expectedType);
+        }
+      }
+      var expectedTypesMessage = (expectedTypes.length > 0) ? ', expected one of type [' + expectedTypes.join(', ') + ']': '';
+      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`' + expectedTypesMessage + '.'));
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createNodeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (!isNode(props[propName])) {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`, expected a ReactNode.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function invalidValidatorError(componentName, location, propFullName, key, type) {
+    return new PropTypeError(
+      (componentName || 'React class') + ': ' + location + ' type `' + propFullName + '.' + key + '` is invalid; ' +
+      'it must be a function, usually from the `prop-types` package, but received `' + type + '`.'
+    );
+  }
+
+  function createShapeTypeChecker(shapeTypes) {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
+      }
+      for (var key in shapeTypes) {
+        var checker = shapeTypes[key];
+        if (typeof checker !== 'function') {
+          return invalidValidatorError(componentName, location, propFullName, key, getPreciseType(checker));
+        }
+        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+        if (error) {
+          return error;
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createStrictShapeTypeChecker(shapeTypes) {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
+      }
+      // We need to check all keys in case some are required but missing from props.
+      var allKeys = assign({}, props[propName], shapeTypes);
+      for (var key in allKeys) {
+        var checker = shapeTypes[key];
+        if (has(shapeTypes, key) && typeof checker !== 'function') {
+          return invalidValidatorError(componentName, location, propFullName, key, getPreciseType(checker));
+        }
+        if (!checker) {
+          return new PropTypeError(
+            'Invalid ' + location + ' `' + propFullName + '` key `' + key + '` supplied to `' + componentName + '`.' +
+            '\nBad object: ' + JSON.stringify(props[propName], null, '  ') +
+            '\nValid keys: ' + JSON.stringify(Object.keys(shapeTypes), null, '  ')
+          );
+        }
+        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+        if (error) {
+          return error;
+        }
+      }
+      return null;
+    }
+
+    return createChainableTypeChecker(validate);
+  }
+
+  function isNode(propValue) {
+    switch (typeof propValue) {
+      case 'number':
+      case 'string':
+      case 'undefined':
+        return true;
+      case 'boolean':
+        return !propValue;
+      case 'object':
+        if (Array.isArray(propValue)) {
+          return propValue.every(isNode);
+        }
+        if (propValue === null || isValidElement(propValue)) {
+          return true;
+        }
+
+        var iteratorFn = getIteratorFn(propValue);
+        if (iteratorFn) {
+          var iterator = iteratorFn.call(propValue);
+          var step;
+          if (iteratorFn !== propValue.entries) {
+            while (!(step = iterator.next()).done) {
+              if (!isNode(step.value)) {
+                return false;
+              }
+            }
+          } else {
+            // Iterator will provide entry [k,v] tuples rather than values.
+            while (!(step = iterator.next()).done) {
+              var entry = step.value;
+              if (entry) {
+                if (!isNode(entry[1])) {
+                  return false;
+                }
+              }
+            }
+          }
+        } else {
+          return false;
+        }
+
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  function isSymbol(propType, propValue) {
+    // Native Symbol.
+    if (propType === 'symbol') {
+      return true;
+    }
+
+    // falsy value can't be a Symbol
+    if (!propValue) {
+      return false;
+    }
+
+    // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
+    if (propValue['@@toStringTag'] === 'Symbol') {
+      return true;
+    }
+
+    // Fallback for non-spec compliant Symbols which are polyfilled.
+    if (typeof Symbol === 'function' && propValue instanceof Symbol) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // Equivalent of `typeof` but with special handling for array and regexp.
+  function getPropType(propValue) {
+    var propType = typeof propValue;
+    if (Array.isArray(propValue)) {
+      return 'array';
+    }
+    if (propValue instanceof RegExp) {
+      // Old webkits (at least until Android 4.0) return 'function' rather than
+      // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
+      // passes PropTypes.object.
+      return 'object';
+    }
+    if (isSymbol(propType, propValue)) {
+      return 'symbol';
+    }
+    return propType;
+  }
+
+  // This handles more types than `getPropType`. Only used for error messages.
+  // See `createPrimitiveTypeChecker`.
+  function getPreciseType(propValue) {
+    if (typeof propValue === 'undefined' || propValue === null) {
+      return '' + propValue;
+    }
+    var propType = getPropType(propValue);
+    if (propType === 'object') {
+      if (propValue instanceof Date) {
+        return 'date';
+      } else if (propValue instanceof RegExp) {
+        return 'regexp';
+      }
+    }
+    return propType;
+  }
+
+  // Returns a string that is postfixed to a warning about an invalid type.
+  // For example, "undefined" or "of type array"
+  function getPostfixForTypeWarning(value) {
+    var type = getPreciseType(value);
+    switch (type) {
+      case 'array':
+      case 'object':
+        return 'an ' + type;
+      case 'boolean':
+      case 'date':
+      case 'regexp':
+        return 'a ' + type;
+      default:
+        return type;
+    }
+  }
+
+  // Returns class name of the object, if any.
+  function getClassName(propValue) {
+    if (!propValue.constructor || !propValue.constructor.name) {
+      return ANONYMOUS;
+    }
+    return propValue.constructor.name;
+  }
+
+  ReactPropTypes.checkPropTypes = checkPropTypes;
+  ReactPropTypes.resetWarningCache = checkPropTypes.resetWarningCache;
+  ReactPropTypes.PropTypes = ReactPropTypes;
+
+  return ReactPropTypes;
+};
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+if (process.env.NODE_ENV !== 'production') {
+  var ReactIs = __webpack_require__(8);
+
+  // By explicitly using `prop-types` you are opting into new development behavior.
+  // http://fb.me/prop-types-in-prod
+  var throwOnDirectAccess = true;
+  module.exports = __webpack_require__(28)(ReactIs.isElement, throwOnDirectAccess);
+} else {
+  // By explicitly using `prop-types` you are opting into new production behavior.
+  // http://fb.me/prop-types-in-prod
+  module.exports = __webpack_require__(27)();
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+
+/***/ }),
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -595,10 +2267,10 @@ if (process.env.NODE_ENV !== "production") {
   (function() {
 'use strict';
 
-var React = __webpack_require__(2);
-var _assign = __webpack_require__(1);
-var Scheduler = __webpack_require__(3);
-var tracing = __webpack_require__(15);
+var React = __webpack_require__(0);
+var _assign = __webpack_require__(4);
+var Scheduler = __webpack_require__(17);
+var tracing = __webpack_require__(62);
 
 var ReactSharedInternals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
 
@@ -26843,10 +28515,10 @@ exports.version = ReactVersion;
   })();
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 8 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26861,7 +28533,7 @@ exports.version = ReactVersion;
 /*
  Modernizr 3.0.0pre (Custom Build) | MIT
 */
-var aa=__webpack_require__(2),m=__webpack_require__(1),r=__webpack_require__(3);function y(a){for(var b="https://reactjs.org/docs/error-decoder.html?invariant="+a,c=1;c<arguments.length;c++)b+="&args[]="+encodeURIComponent(arguments[c]);return"Minified React error #"+a+"; visit "+b+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings."}if(!aa)throw Error(y(227));var ba=new Set,ca={};function da(a,b){ea(a,b);ea(a+"Capture",b)}
+var aa=__webpack_require__(0),m=__webpack_require__(4),r=__webpack_require__(17);function y(a){for(var b="https://reactjs.org/docs/error-decoder.html?invariant="+a,c=1;c<arguments.length;c++)b+="&args[]="+encodeURIComponent(arguments[c]);return"Minified React error #"+a+"; visit "+b+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings."}if(!aa)throw Error(y(227));var ba=new Set,ca={};function da(a,b){ea(a,b);ea(a+"Capture",b)}
 function ea(a,b){ca[a]=b;for(a=0;a<b.length;a++)ba.add(b[a])}
 var fa=!("undefined"===typeof window||"undefined"===typeof window.document||"undefined"===typeof window.document.createElement),ha=/^[:A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD][:A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\-.0-9\u00B7\u0300-\u036F\u203F-\u2040]*$/,ia=Object.prototype.hasOwnProperty,
 ja={},ka={};function la(a){if(ia.call(ka,a))return!0;if(ia.call(ja,a))return!1;if(ha.test(a))return ka[a]=!0;ja[a]=!0;return!1}function ma(a,b,c,d){if(null!==c&&0===c.type)return!1;switch(typeof b){case "function":case "symbol":return!0;case "boolean":if(d)return!1;if(null!==c)return!c.acceptsBooleans;a=a.toLowerCase().slice(0,5);return"data-"!==a&&"aria-"!==a;default:return!1}}
@@ -27150,7 +28822,2127 @@ exports.unstable_renderSubtreeIntoContainer=function(a,b,c,d){if(!rk(c))throw Er
 
 
 /***/ }),
-/* 9 */
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {/** @license React v16.13.1
+ * react-is.development.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+
+
+if (process.env.NODE_ENV !== "production") {
+  (function() {
+'use strict';
+
+// The Symbol used to tag the ReactElement-like types. If there is no native Symbol
+// nor polyfill, then a plain number is used for performance.
+var hasSymbol = typeof Symbol === 'function' && Symbol.for;
+var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;
+var REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca;
+var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for('react.fragment') : 0xeacb;
+var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for('react.strict_mode') : 0xeacc;
+var REACT_PROFILER_TYPE = hasSymbol ? Symbol.for('react.profiler') : 0xead2;
+var REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for('react.provider') : 0xeacd;
+var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace; // TODO: We don't use AsyncMode or ConcurrentMode anymore. They were temporary
+// (unstable) APIs that have been removed. Can we remove the symbols?
+
+var REACT_ASYNC_MODE_TYPE = hasSymbol ? Symbol.for('react.async_mode') : 0xeacf;
+var REACT_CONCURRENT_MODE_TYPE = hasSymbol ? Symbol.for('react.concurrent_mode') : 0xeacf;
+var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for('react.forward_ref') : 0xead0;
+var REACT_SUSPENSE_TYPE = hasSymbol ? Symbol.for('react.suspense') : 0xead1;
+var REACT_SUSPENSE_LIST_TYPE = hasSymbol ? Symbol.for('react.suspense_list') : 0xead8;
+var REACT_MEMO_TYPE = hasSymbol ? Symbol.for('react.memo') : 0xead3;
+var REACT_LAZY_TYPE = hasSymbol ? Symbol.for('react.lazy') : 0xead4;
+var REACT_BLOCK_TYPE = hasSymbol ? Symbol.for('react.block') : 0xead9;
+var REACT_FUNDAMENTAL_TYPE = hasSymbol ? Symbol.for('react.fundamental') : 0xead5;
+var REACT_RESPONDER_TYPE = hasSymbol ? Symbol.for('react.responder') : 0xead6;
+var REACT_SCOPE_TYPE = hasSymbol ? Symbol.for('react.scope') : 0xead7;
+
+function isValidElementType(type) {
+  return typeof type === 'string' || typeof type === 'function' || // Note: its typeof might be other than 'symbol' or 'number' if it's a polyfill.
+  type === REACT_FRAGMENT_TYPE || type === REACT_CONCURRENT_MODE_TYPE || type === REACT_PROFILER_TYPE || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || type === REACT_SUSPENSE_LIST_TYPE || typeof type === 'object' && type !== null && (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE || type.$$typeof === REACT_FUNDAMENTAL_TYPE || type.$$typeof === REACT_RESPONDER_TYPE || type.$$typeof === REACT_SCOPE_TYPE || type.$$typeof === REACT_BLOCK_TYPE);
+}
+
+function typeOf(object) {
+  if (typeof object === 'object' && object !== null) {
+    var $$typeof = object.$$typeof;
+
+    switch ($$typeof) {
+      case REACT_ELEMENT_TYPE:
+        var type = object.type;
+
+        switch (type) {
+          case REACT_ASYNC_MODE_TYPE:
+          case REACT_CONCURRENT_MODE_TYPE:
+          case REACT_FRAGMENT_TYPE:
+          case REACT_PROFILER_TYPE:
+          case REACT_STRICT_MODE_TYPE:
+          case REACT_SUSPENSE_TYPE:
+            return type;
+
+          default:
+            var $$typeofType = type && type.$$typeof;
+
+            switch ($$typeofType) {
+              case REACT_CONTEXT_TYPE:
+              case REACT_FORWARD_REF_TYPE:
+              case REACT_LAZY_TYPE:
+              case REACT_MEMO_TYPE:
+              case REACT_PROVIDER_TYPE:
+                return $$typeofType;
+
+              default:
+                return $$typeof;
+            }
+
+        }
+
+      case REACT_PORTAL_TYPE:
+        return $$typeof;
+    }
+  }
+
+  return undefined;
+} // AsyncMode is deprecated along with isAsyncMode
+
+var AsyncMode = REACT_ASYNC_MODE_TYPE;
+var ConcurrentMode = REACT_CONCURRENT_MODE_TYPE;
+var ContextConsumer = REACT_CONTEXT_TYPE;
+var ContextProvider = REACT_PROVIDER_TYPE;
+var Element = REACT_ELEMENT_TYPE;
+var ForwardRef = REACT_FORWARD_REF_TYPE;
+var Fragment = REACT_FRAGMENT_TYPE;
+var Lazy = REACT_LAZY_TYPE;
+var Memo = REACT_MEMO_TYPE;
+var Portal = REACT_PORTAL_TYPE;
+var Profiler = REACT_PROFILER_TYPE;
+var StrictMode = REACT_STRICT_MODE_TYPE;
+var Suspense = REACT_SUSPENSE_TYPE;
+var hasWarnedAboutDeprecatedIsAsyncMode = false; // AsyncMode should be deprecated
+
+function isAsyncMode(object) {
+  {
+    if (!hasWarnedAboutDeprecatedIsAsyncMode) {
+      hasWarnedAboutDeprecatedIsAsyncMode = true; // Using console['warn'] to evade Babel and ESLint
+
+      console['warn']('The ReactIs.isAsyncMode() alias has been deprecated, ' + 'and will be removed in React 17+. Update your code to use ' + 'ReactIs.isConcurrentMode() instead. It has the exact same API.');
+    }
+  }
+
+  return isConcurrentMode(object) || typeOf(object) === REACT_ASYNC_MODE_TYPE;
+}
+function isConcurrentMode(object) {
+  return typeOf(object) === REACT_CONCURRENT_MODE_TYPE;
+}
+function isContextConsumer(object) {
+  return typeOf(object) === REACT_CONTEXT_TYPE;
+}
+function isContextProvider(object) {
+  return typeOf(object) === REACT_PROVIDER_TYPE;
+}
+function isElement(object) {
+  return typeof object === 'object' && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
+}
+function isForwardRef(object) {
+  return typeOf(object) === REACT_FORWARD_REF_TYPE;
+}
+function isFragment(object) {
+  return typeOf(object) === REACT_FRAGMENT_TYPE;
+}
+function isLazy(object) {
+  return typeOf(object) === REACT_LAZY_TYPE;
+}
+function isMemo(object) {
+  return typeOf(object) === REACT_MEMO_TYPE;
+}
+function isPortal(object) {
+  return typeOf(object) === REACT_PORTAL_TYPE;
+}
+function isProfiler(object) {
+  return typeOf(object) === REACT_PROFILER_TYPE;
+}
+function isStrictMode(object) {
+  return typeOf(object) === REACT_STRICT_MODE_TYPE;
+}
+function isSuspense(object) {
+  return typeOf(object) === REACT_SUSPENSE_TYPE;
+}
+
+exports.AsyncMode = AsyncMode;
+exports.ConcurrentMode = ConcurrentMode;
+exports.ContextConsumer = ContextConsumer;
+exports.ContextProvider = ContextProvider;
+exports.Element = Element;
+exports.ForwardRef = ForwardRef;
+exports.Fragment = Fragment;
+exports.Lazy = Lazy;
+exports.Memo = Memo;
+exports.Portal = Portal;
+exports.Profiler = Profiler;
+exports.StrictMode = StrictMode;
+exports.Suspense = Suspense;
+exports.isAsyncMode = isAsyncMode;
+exports.isConcurrentMode = isConcurrentMode;
+exports.isContextConsumer = isContextConsumer;
+exports.isContextProvider = isContextProvider;
+exports.isElement = isElement;
+exports.isForwardRef = isForwardRef;
+exports.isFragment = isFragment;
+exports.isLazy = isLazy;
+exports.isMemo = isMemo;
+exports.isPortal = isPortal;
+exports.isProfiler = isProfiler;
+exports.isStrictMode = isStrictMode;
+exports.isSuspense = isSuspense;
+exports.isValidElementType = isValidElementType;
+exports.typeOf = typeOf;
+  })();
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/** @license React v16.13.1
+ * react-is.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var b="function"===typeof Symbol&&Symbol.for,c=b?Symbol.for("react.element"):60103,d=b?Symbol.for("react.portal"):60106,e=b?Symbol.for("react.fragment"):60107,f=b?Symbol.for("react.strict_mode"):60108,g=b?Symbol.for("react.profiler"):60114,h=b?Symbol.for("react.provider"):60109,k=b?Symbol.for("react.context"):60110,l=b?Symbol.for("react.async_mode"):60111,m=b?Symbol.for("react.concurrent_mode"):60111,n=b?Symbol.for("react.forward_ref"):60112,p=b?Symbol.for("react.suspense"):60113,q=b?
+Symbol.for("react.suspense_list"):60120,r=b?Symbol.for("react.memo"):60115,t=b?Symbol.for("react.lazy"):60116,v=b?Symbol.for("react.block"):60121,w=b?Symbol.for("react.fundamental"):60117,x=b?Symbol.for("react.responder"):60118,y=b?Symbol.for("react.scope"):60119;
+function z(a){if("object"===typeof a&&null!==a){var u=a.$$typeof;switch(u){case c:switch(a=a.type,a){case l:case m:case e:case g:case f:case p:return a;default:switch(a=a&&a.$$typeof,a){case k:case n:case t:case r:case h:return a;default:return u}}case d:return u}}}function A(a){return z(a)===m}exports.AsyncMode=l;exports.ConcurrentMode=m;exports.ContextConsumer=k;exports.ContextProvider=h;exports.Element=c;exports.ForwardRef=n;exports.Fragment=e;exports.Lazy=t;exports.Memo=r;exports.Portal=d;
+exports.Profiler=g;exports.StrictMode=f;exports.Suspense=p;exports.isAsyncMode=function(a){return A(a)||z(a)===l};exports.isConcurrentMode=A;exports.isContextConsumer=function(a){return z(a)===k};exports.isContextProvider=function(a){return z(a)===h};exports.isElement=function(a){return"object"===typeof a&&null!==a&&a.$$typeof===c};exports.isForwardRef=function(a){return z(a)===n};exports.isFragment=function(a){return z(a)===e};exports.isLazy=function(a){return z(a)===t};
+exports.isMemo=function(a){return z(a)===r};exports.isPortal=function(a){return z(a)===d};exports.isProfiler=function(a){return z(a)===g};exports.isStrictMode=function(a){return z(a)===f};exports.isSuspense=function(a){return z(a)===p};
+exports.isValidElementType=function(a){return"string"===typeof a||"function"===typeof a||a===e||a===m||a===g||a===f||a===p||a===q||"object"===typeof a&&null!==a&&(a.$$typeof===t||a.$$typeof===r||a.$$typeof===h||a.$$typeof===k||a.$$typeof===n||a.$$typeof===w||a.$$typeof===x||a.$$typeof===y||a.$$typeof===v)};exports.typeOf=z;
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CommandOrchestrator = exports.getStateFromTextArea = exports.TextAreaTextApi = void 0;
+var __1 = __webpack_require__(15);
+var InsertTextAtPosition_1 = __webpack_require__(16);
+var command_utils_1 = __webpack_require__(35);
+var defaults_1 = __webpack_require__(6);
+var TextAreaTextApi = /** @class */ (function () {
+    function TextAreaTextApi(textAreaRef) {
+        this.textAreaRef = textAreaRef;
+    }
+    TextAreaTextApi.prototype.replaceSelection = function (text) {
+        var textArea = this.textAreaRef.current;
+        InsertTextAtPosition_1.insertText(textArea, text);
+        return getStateFromTextArea(textArea);
+    };
+    TextAreaTextApi.prototype.setSelectionRange = function (selection) {
+        var textArea = this.textAreaRef.current;
+        textArea.focus();
+        textArea.selectionStart = selection.start;
+        textArea.selectionEnd = selection.end;
+        return getStateFromTextArea(textArea);
+    };
+    TextAreaTextApi.prototype.getState = function () {
+        var textArea = this.textAreaRef.current;
+        return getStateFromTextArea(textArea);
+    };
+    return TextAreaTextApi;
+}());
+exports.TextAreaTextApi = TextAreaTextApi;
+function getStateFromTextArea(textArea) {
+    return {
+        selection: {
+            start: textArea.selectionStart,
+            end: textArea.selectionEnd
+        },
+        text: textArea.value,
+        selectedText: textArea.value.slice(textArea.selectionStart, textArea.selectionEnd)
+    };
+}
+exports.getStateFromTextArea = getStateFromTextArea;
+var CommandOrchestrator = /** @class */ (function () {
+    function CommandOrchestrator(customCommands, textArea, l18n, pasteOptions) {
+        var _this = this;
+        this.getCommand = function (name) {
+            var command = _this.commandMap[name];
+            if (!command) {
+                throw new Error("Cannot execute command. Command not found: " + name);
+            }
+            return command;
+        };
+        /**
+         * Tries to find a command the wants to handle the keyboard event.
+         * If a command is found, it is executed and the function returns
+         */
+        this.handlePossibleKeyCommand = function (e) {
+            for (var _i = 0, _a = _this.keyActivatedCommands; _i < _a.length; _i++) {
+                var commandName = _a[_i];
+                if (_this.getCommand(commandName).handleKeyCommand(e)) {
+                    _this.executeCommand(commandName).then(function (r) { });
+                    return true;
+                }
+            }
+            return false;
+        };
+        if (pasteOptions && !pasteOptions.saveImage) {
+            throw new Error("paste options are incomplete. saveImage are required ");
+        }
+        this.commandMap = __assign(__assign({}, __1.getDefaultCommandMap()), (customCommands || {}));
+        this.pasteOptions = pasteOptions;
+        this.keyActivatedCommands = command_utils_1.extractKeyActivatedCommands(customCommands);
+        this.textAreaRef = textArea;
+        this.textApi = new TextAreaTextApi(textArea);
+        this.l18n = l18n;
+    }
+    CommandOrchestrator.prototype.executeCommand = function (commandName, context) {
+        return __awaiter(this, void 0, void 0, function () {
+            var command, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (this.isExecuting) {
+                            // The simplest thing to do is to ignore commands while
+                            // there is already a command executing. The alternative would be to queue commands
+                            // but there is no guarantee that the state after one command executes will still be compatible
+                            // with the next one. In fact, it is likely not to be.
+                            return [2 /*return*/];
+                        }
+                        this.isExecuting = true;
+                        command = this.commandMap[commandName];
+                        result = command.execute({
+                            initialState: getStateFromTextArea(this.textAreaRef.current),
+                            textApi: this.textApi,
+                            l18n: this.l18n,
+                            context: context
+                        });
+                        return [4 /*yield*/, result];
+                    case 1:
+                        _a.sent();
+                        this.isExecuting = false;
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /**
+     * Executes the paste command
+     */
+    CommandOrchestrator.prototype.executePasteCommand = function (event) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (this.pasteOptions) {
+                    return [2 /*return*/, this.executeCommand(this.pasteOptions.command || defaults_1.getDefaultSaveImageCommandName(), {
+                            pasteOptions: this.pasteOptions,
+                            event: event
+                        })];
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
+    /**
+     * Executes the drop command
+     */
+    CommandOrchestrator.prototype.executeDropCommand = function (event) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (this.pasteOptions) {
+                    return [2 /*return*/, this.executeCommand(this.pasteOptions.command || defaults_1.getDefaultSaveImageCommandName(), {
+                            pasteOptions: this.pasteOptions,
+                            event: event
+                        })];
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
+    /**
+     * Executes the "select image" command
+     */
+    CommandOrchestrator.prototype.executeSelectImageCommand = function (event) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (this.pasteOptions) {
+                    return [2 /*return*/, this.executeCommand(this.pasteOptions.command || defaults_1.getDefaultSaveImageCommandName(), {
+                            pasteOptions: this.pasteOptions,
+                            event: event
+                        })];
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
+    /**
+     * Returns a command by name
+     * @param name
+     */
+    CommandOrchestrator.prototype.getCommandByName = function (name) {
+        return this.commandMap[name];
+    };
+    return CommandOrchestrator;
+}());
+exports.CommandOrchestrator = CommandOrchestrator;
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.extractKeyActivatedCommands = void 0;
+/**
+ * Returns a flat array of commands that can be activated by the keyboard.
+ * When keydowns happen, these commands 'handleKeyCommand' will be executed, in this order,
+ * and the first that returns true will be executed.
+ */
+function extractKeyActivatedCommands(commandMap) {
+    var result = [];
+    for (var command in commandMap) {
+        if (commandMap.hasOwnProperty(command)) {
+            if (commandMap[command].handleKeyCommand) {
+                result.push(command);
+            }
+        }
+    }
+    return result;
+}
+exports.extractKeyActivatedCommands = extractKeyActivatedCommands;
+
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.boldCommand = void 0;
+var MarkdownUtil_1 = __webpack_require__(2);
+exports.boldCommand = {
+    buttonProps: { "aria-label": "Add bold text" },
+    execute: function (_a) {
+        var initialState = _a.initialState, textApi = _a.textApi;
+        // Adjust the selection to encompass the whole word if the caret is inside one
+        var newSelectionRange = MarkdownUtil_1.selectWord({
+            text: initialState.text,
+            selection: initialState.selection
+        });
+        var state1 = textApi.setSelectionRange(newSelectionRange);
+        // Replaces the current selection with the bold mark up
+        var state2 = textApi.replaceSelection("**" + state1.selectedText + "**");
+        // Adjust the selection to not contain the **
+        textApi.setSelectionRange({
+            start: state2.selection.end - 2 - state1.selectedText.length,
+            end: state2.selection.end - 2
+        });
+    },
+    handleKeyCommand: function (e) { return (e.ctrlKey || e.metaKey) && e.key == "b"; }
+};
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.codeCommand = void 0;
+var MarkdownUtil_1 = __webpack_require__(2);
+exports.codeCommand = {
+    buttonProps: { "aria-label": "Insert code" },
+    execute: function (_a) {
+        var initialState = _a.initialState, textApi = _a.textApi;
+        // Adjust the selection to encompass the whole word if the caret is inside one
+        var newSelectionRange = MarkdownUtil_1.selectWord({
+            text: initialState.text,
+            selection: initialState.selection
+        });
+        var state1 = textApi.setSelectionRange(newSelectionRange);
+        // when there's no breaking line
+        if (state1.selectedText.indexOf("\n") === -1) {
+            textApi.replaceSelection("`" + state1.selectedText + "`");
+            // Adjust the selection to not contain the **
+            var selectionStart_1 = state1.selection.start + 1;
+            var selectionEnd_1 = selectionStart_1 + state1.selectedText.length;
+            textApi.setSelectionRange({
+                start: selectionStart_1,
+                end: selectionEnd_1
+            });
+            return;
+        }
+        var breaksBeforeCount = MarkdownUtil_1.getBreaksNeededForEmptyLineBefore(state1.text, state1.selection.start);
+        var breaksBefore = Array(breaksBeforeCount + 1).join("\n");
+        var breaksAfterCount = MarkdownUtil_1.getBreaksNeededForEmptyLineAfter(state1.text, state1.selection.end);
+        var breaksAfter = Array(breaksAfterCount + 1).join("\n");
+        textApi.replaceSelection(breaksBefore + "```\n" + state1.selectedText + "\n```" + breaksAfter);
+        var selectionStart = state1.selection.start + breaksBeforeCount + 4;
+        var selectionEnd = selectionStart + state1.selectedText.length;
+        textApi.setSelectionRange({
+            start: selectionStart,
+            end: selectionEnd
+        });
+    }
+};
+
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.headerCommand = void 0;
+var MarkdownUtil_1 = __webpack_require__(2);
+function setHeader(initialState, api, prefix) {
+    // Adjust the selection to encompass the whole word if the caret is inside one
+    var newSelectionRange = MarkdownUtil_1.selectWord({
+        text: initialState.text,
+        selection: initialState.selection
+    });
+    var state1 = api.setSelectionRange(newSelectionRange);
+    // Add the prefix to the selection
+    var state2 = api.replaceSelection("" + prefix + state1.selectedText);
+    // Adjust the selection to not contain the prefix
+    api.setSelectionRange({
+        start: state2.selection.end - state1.selectedText.length,
+        end: state2.selection.end
+    });
+}
+exports.headerCommand = {
+    buttonProps: { "aria-label": "Add header" },
+    execute: function (_a) {
+        var initialState = _a.initialState, textApi = _a.textApi;
+        setHeader(initialState, textApi, "### ");
+    }
+};
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.imageCommand = void 0;
+var MarkdownUtil_1 = __webpack_require__(2);
+exports.imageCommand = {
+    buttonProps: { "aria-label": "Add image" },
+    execute: function (_a) {
+        var initialState = _a.initialState, textApi = _a.textApi;
+        // Replaces the current selection with the whole word selected
+        var state1 = textApi.setSelectionRange(MarkdownUtil_1.selectWord({
+            text: initialState.text,
+            selection: initialState.selection
+        }));
+        // Replaces the current selection with the image
+        var imageTemplate = state1.selectedText || "https://example.com/your-image.png";
+        textApi.replaceSelection("![](" + imageTemplate + ")");
+        // Adjust the selection to not contain the **
+        textApi.setSelectionRange({
+            start: state1.selection.start + 4,
+            end: state1.selection.start + 4 + imageTemplate.length
+        });
+    }
+};
+
+
+/***/ }),
+/* 40 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.italicCommand = void 0;
+var MarkdownUtil_1 = __webpack_require__(2);
+exports.italicCommand = {
+    buttonProps: { "aria-label": "Add italic text" },
+    execute: function (_a) {
+        var initialState = _a.initialState, textApi = _a.textApi;
+        // Adjust the selection to encompass the whole word if the caret is inside one
+        var newSelectionRange = MarkdownUtil_1.selectWord({
+            text: initialState.text,
+            selection: initialState.selection
+        });
+        var state1 = textApi.setSelectionRange(newSelectionRange);
+        // Replaces the current selection with the italic mark up
+        var state2 = textApi.replaceSelection("*" + state1.selectedText + "*");
+        // Adjust the selection to not contain the *
+        textApi.setSelectionRange({
+            start: state2.selection.end - 1 - state1.selectedText.length,
+            end: state2.selection.end - 1
+        });
+    },
+    handleKeyCommand: function (e) { return (e.ctrlKey || e.metaKey) && e.key == "i"; }
+};
+
+
+/***/ }),
+/* 41 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.linkCommand = void 0;
+var MarkdownUtil_1 = __webpack_require__(2);
+exports.linkCommand = {
+    buttonProps: { "aria-label": "Add a link" },
+    execute: function (_a) {
+        var initialState = _a.initialState, textApi = _a.textApi;
+        // Adjust the selection to encompass the whole word if the caret is inside one
+        var newSelectionRange = MarkdownUtil_1.selectWord({
+            text: initialState.text,
+            selection: initialState.selection
+        });
+        var state1 = textApi.setSelectionRange(newSelectionRange);
+        // Replaces the current selection with the bold mark up
+        var state2 = textApi.replaceSelection("[" + state1.selectedText + "](url)");
+        // Adjust the selection to not contain the **
+        textApi.setSelectionRange({
+            start: state2.selection.end - 6 - state1.selectedText.length,
+            end: state2.selection.end - 6
+        });
+    },
+    handleKeyCommand: function (e) { return (e.ctrlKey || e.metaKey) && e.key == "k"; }
+};
+
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.checkedListCommand = exports.orderedListCommand = exports.unorderedListCommand = exports.makeList = exports.insertBeforeEachLine = void 0;
+var MarkdownUtil_1 = __webpack_require__(2);
+/**
+ * Inserts insertionString before each line
+ */
+function insertBeforeEachLine(selectedText, insertBefore) {
+    var lines = selectedText.split(/\n/);
+    var insertionLength = 0;
+    var modifiedText = lines
+        .map(function (item, index) {
+        if (typeof insertBefore === "string") {
+            insertionLength += insertBefore.length;
+            return insertBefore + item;
+        }
+        else if (typeof insertBefore === "function") {
+            var insertionResult = insertBefore(item, index);
+            insertionLength += insertionResult.length;
+            return insertBefore(item, index) + item;
+        }
+        throw Error("insertion is expected to be either a string or a function");
+    })
+        .join("\n");
+    return { modifiedText: modifiedText, insertionLength: insertionLength };
+}
+exports.insertBeforeEachLine = insertBeforeEachLine;
+var makeList = function (state0, api, insertBefore) {
+    // Adjust the selection to encompass the whole word if the caret is inside one
+    var newSelectionRange = MarkdownUtil_1.selectWord({
+        text: state0.text,
+        selection: state0.selection
+    });
+    var state1 = api.setSelectionRange(newSelectionRange);
+    var breaksBeforeCount = MarkdownUtil_1.getBreaksNeededForEmptyLineBefore(state1.text, state1.selection.start);
+    var breaksBefore = Array(breaksBeforeCount + 1).join("\n");
+    var breaksAfterCount = MarkdownUtil_1.getBreaksNeededForEmptyLineAfter(state1.text, state1.selection.end);
+    var breaksAfter = Array(breaksAfterCount + 1).join("\n");
+    var modifiedText = insertBeforeEachLine(state1.selectedText, insertBefore);
+    api.replaceSelection("" + breaksBefore + modifiedText.modifiedText + breaksAfter);
+    // Specifically when the text has only one line, we can exclude the "- ", for example, from the selection
+    var oneLinerOffset = state1.selectedText.indexOf("\n") === -1 ? modifiedText.insertionLength : 0;
+    var selectionStart = state1.selection.start + breaksBeforeCount + oneLinerOffset;
+    var selectionEnd = selectionStart + modifiedText.modifiedText.length - oneLinerOffset;
+    // Adjust the selection to not contain the **
+    api.setSelectionRange({
+        start: selectionStart,
+        end: selectionEnd
+    });
+};
+exports.makeList = makeList;
+exports.unorderedListCommand = {
+    buttonProps: { "aria-label": "Add unordered list" },
+    execute: function (_a) {
+        var initialState = _a.initialState, textApi = _a.textApi;
+        exports.makeList(initialState, textApi, "- ");
+    }
+};
+exports.orderedListCommand = {
+    buttonProps: { "aria-label": "Add ordered list" },
+    execute: function (_a) {
+        var initialState = _a.initialState, textApi = _a.textApi;
+        exports.makeList(initialState, textApi, function (item, index) { return index + 1 + ". "; });
+    }
+};
+exports.checkedListCommand = {
+    buttonProps: { "aria-label": "Add checked list" },
+    execute: function (_a) {
+        var initialState = _a.initialState, textApi = _a.textApi;
+        exports.makeList(initialState, textApi, function (item, index) { return "- [ ] "; });
+    }
+};
+
+
+/***/ }),
+/* 43 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.quoteCommand = void 0;
+var MarkdownUtil_1 = __webpack_require__(2);
+exports.quoteCommand = {
+    buttonProps: { "aria-label": "Insert a quote" },
+    execute: function (_a) {
+        var initialState = _a.initialState, textApi = _a.textApi;
+        // Adjust the selection to encompass the whole word if the caret is inside one
+        var newSelectionRange = MarkdownUtil_1.selectWord({
+            text: initialState.text,
+            selection: initialState.selection
+        });
+        var state1 = textApi.setSelectionRange(newSelectionRange);
+        var breaksBeforeCount = MarkdownUtil_1.getBreaksNeededForEmptyLineBefore(state1.text, state1.selection.start);
+        var breaksBefore = Array(breaksBeforeCount + 1).join("\n");
+        var breaksAfterCount = MarkdownUtil_1.getBreaksNeededForEmptyLineAfter(state1.text, state1.selection.end);
+        var breaksAfter = Array(breaksAfterCount + 1).join("\n");
+        // Replaces the current selection with the quote mark up
+        textApi.replaceSelection(breaksBefore + "> " + state1.selectedText + breaksAfter);
+        var selectionStart = state1.selection.start + breaksBeforeCount + 2;
+        var selectionEnd = selectionStart + state1.selectedText.length;
+        textApi.setSelectionRange({
+            start: selectionStart,
+            end: selectionEnd
+        });
+    }
+};
+
+
+/***/ }),
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.saveImageCommand = void 0;
+var files_1 = __webpack_require__(54);
+var MarkdownUtil_1 = __webpack_require__(2);
+function dataTransferToArray(items) {
+    var result = [];
+    for (var index in items) {
+        var item = items[index];
+        if (item.kind === "file") {
+            result.push(item.getAsFile());
+        }
+    }
+    return result;
+}
+function fileListToArray(list) {
+    var result = [];
+    for (var i = 0; i < list.length; i++) {
+        result.push(list[0]);
+    }
+    return result;
+}
+function filterItems(items, _a) {
+    var multiple = _a.multiple, accept = _a.accept;
+    var filteredItems = items;
+    if (!multiple) {
+        filteredItems = filteredItems.slice(0, 1);
+    }
+    if (accept) {
+        //https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file_type_specifiers
+        var acceptedTypes = accept.split(",");
+        var fileExtensions_1 = new Set(acceptedTypes.filter(function (t) { return /^\.\w+/.test(t); }).map(function (t) { return t.split(".")[1]; }));
+        var mimeTypes_1 = new Set(acceptedTypes.filter(function (t) { return /^[-\w.]+\/[-\w.]+$/.test(t); }));
+        var anyTypes_1 = new Set(acceptedTypes
+            .filter(function (t) { return /(audio|video|image)\/\*/.test(t); })
+            .map(function (t) { return t.split("/")[0]; }));
+        filteredItems = filteredItems.filter(function (f) {
+            return fileExtensions_1.has(f.name.split(".")[1]) ||
+                mimeTypes_1.has(f.type) ||
+                anyTypes_1.has(f.type.split("/")[0]);
+        });
+    }
+    return filteredItems;
+}
+exports.saveImageCommand = {
+    execute: function (_a) {
+        var initialState = _a.initialState, textApi = _a.textApi, context = _a.context, l18n = _a.l18n;
+        return __awaiter(this, void 0, void 0, function () {
+            var pasteContext, event, _b, saveImage, multiple, accept, items, filteredItems, _c, _d, _i, index, initialState_1, breaksBeforeCount, breaksBefore, placeHolder, blob, blobContents, savingImage, imageUrl, newState, uploadingText, realImageMarkdown, selectionDelta;
+            return __generator(this, function (_e) {
+                switch (_e.label) {
+                    case 0:
+                        if (!context) {
+                            throw new Error("wrong context");
+                        }
+                        pasteContext = context;
+                        event = pasteContext.event, _b = pasteContext.pasteOptions, saveImage = _b.saveImage, multiple = _b.multiple, accept = _b.accept;
+                        items = isPasteEvent(context)
+                            ? dataTransferToArray(event.clipboardData.items)
+                            : isDragEvent(context)
+                                ? dataTransferToArray(event.dataTransfer.items)
+                                : fileListToArray(event.target.files);
+                        filteredItems = filterItems(items, { multiple: multiple, accept: accept });
+                        _c = [];
+                        for (_d in filteredItems)
+                            _c.push(_d);
+                        _i = 0;
+                        _e.label = 1;
+                    case 1:
+                        if (!(_i < _c.length)) return [3 /*break*/, 5];
+                        index = _c[_i];
+                        initialState_1 = textApi.getState();
+                        breaksBeforeCount = MarkdownUtil_1.getBreaksNeededForEmptyLineBefore(initialState_1.text, initialState_1.selection.start);
+                        breaksBefore = Array(breaksBeforeCount + 1).join("\n");
+                        placeHolder = breaksBefore + "![" + l18n.uploadingImage + "]()";
+                        textApi.replaceSelection(placeHolder);
+                        blob = items[index];
+                        return [4 /*yield*/, files_1.readFileAsync(blob)];
+                    case 2:
+                        blobContents = _e.sent();
+                        savingImage = saveImage(blobContents, blob);
+                        return [4 /*yield*/, savingImage.next()];
+                    case 3:
+                        imageUrl = (_e.sent()).value;
+                        newState = textApi.getState();
+                        uploadingText = newState.text.substr(initialState_1.selection.start, placeHolder.length);
+                        if (uploadingText === placeHolder) {
+                            // In this case, the user did not touch the placeholder. Good user
+                            // we will replace it with the real one that came from the server
+                            textApi.setSelectionRange({
+                                start: initialState_1.selection.start,
+                                end: initialState_1.selection.start + placeHolder.length
+                            });
+                            realImageMarkdown = imageUrl
+                                ? breaksBefore + "![image](" + imageUrl + ")"
+                                : "";
+                            selectionDelta = realImageMarkdown.length - placeHolder.length;
+                            textApi.replaceSelection(realImageMarkdown);
+                            textApi.setSelectionRange({
+                                start: newState.selection.start + selectionDelta,
+                                end: newState.selection.end + selectionDelta
+                            });
+                        }
+                        _e.label = 4;
+                    case 4:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 5: return [2 /*return*/];
+                }
+            });
+        });
+    }
+};
+function isPasteEvent(context) {
+    return (context.event
+        .clipboardData !== undefined);
+}
+function isDragEvent(context) {
+    return (context.event.dataTransfer !==
+        undefined);
+}
+
+
+/***/ }),
+/* 45 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.strikeThroughCommand = void 0;
+var MarkdownUtil_1 = __webpack_require__(2);
+exports.strikeThroughCommand = {
+    buttonProps: { "aria-label": "Add strikethrough text" },
+    execute: function (_a) {
+        var initialState = _a.initialState, textApi = _a.textApi;
+        // Adjust the selection to encompass the whole word if the caret is inside one
+        var newSelectionRange = MarkdownUtil_1.selectWord({
+            text: initialState.text,
+            selection: initialState.selection
+        });
+        var state1 = textApi.setSelectionRange(newSelectionRange);
+        // Replaces the current selection with the strikethrough mark up
+        var state2 = textApi.replaceSelection("~~" + state1.selectedText + "~~");
+        // Adjust the selection to not contain the ~~
+        textApi.setSelectionRange({
+            start: state2.selection.end - 2 - state1.selectedText.length,
+            end: state2.selection.end - 2
+        });
+    }
+};
+
+
+/***/ }),
+/* 46 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Preview = void 0;
+var React = __webpack_require__(0);
+var ClassNames_1 = __webpack_require__(3);
+var Preview = /** @class */ (function (_super) {
+    __extends(Preview, _super);
+    function Preview(props) {
+        var _this = _super.call(this, props) || this;
+        _this.state = {
+            loading: true
+        };
+        return _this;
+    }
+    Preview.prototype.componentDidMount = function () {
+        this.generatePreview();
+    };
+    Preview.prototype.componentDidUpdate = function (prevProps, prevState) {
+        if (this.props.markdown !== prevProps.markdown) {
+            this.generatePreview();
+        }
+    };
+    Preview.prototype.generatePreview = function () {
+        var _this = this;
+        var _a = this.props, markdown = _a.markdown, generateMarkdownPreview = _a.generateMarkdownPreview;
+        generateMarkdownPreview(markdown).then(function (preview) {
+            _this.setState({
+                preview: preview,
+                loading: false
+            });
+        });
+    };
+    Preview.prototype.render = function () {
+        var _a = this.props, classes = _a.classes, minHeight = _a.minHeight, loadingPreview = _a.loadingPreview, refObject = _a.refObject, heightUnits = _a.heightUnits;
+        var _b = this.state, preview = _b.preview, loading = _b.loading;
+        var finalHtml = loading ? loadingPreview : preview;
+        var content;
+        if (typeof finalHtml === "string") {
+            content = (React.createElement("div", { className: "mde-preview-content", dangerouslySetInnerHTML: { __html: finalHtml || "<p>&nbsp;</p>" }, ref: refObject }));
+        }
+        else {
+            content = React.createElement("div", { className: "mde-preview-content" }, finalHtml);
+        }
+        var minHeightVal = minHeight && heightUnits ? minHeight + 10 + heightUnits : minHeight + 10;
+        return (React.createElement("div", { className: ClassNames_1.classNames("mde-preview", classes, { loading: loading }), style: { minHeight: minHeightVal }, "data-testid": "mde-preview" }, content));
+    };
+    return Preview;
+}(React.Component));
+exports.Preview = Preview;
+
+
+/***/ }),
+/* 47 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ReactMde = void 0;
+var React = __webpack_require__(0);
+var _1 = __webpack_require__(12);
+var defaults_1 = __webpack_require__(6);
+var react_mde_en_1 = __webpack_require__(51);
+var icons_1 = __webpack_require__(14);
+var ClassNames_1 = __webpack_require__(3);
+var command_orchestrator_1 = __webpack_require__(34);
+var pasteOptionDefaults = {
+    accept: "image/*",
+    multiple: false
+};
+var ReactMde = /** @class */ (function (_super) {
+    __extends(ReactMde, _super);
+    function ReactMde(props) {
+        var _a;
+        var _this = _super.call(this, props) || this;
+        _this.handleTextChange = function (value) {
+            var onChange = _this.props.onChange;
+            onChange(value);
+        };
+        _this.handlePaste = function (event) { return __awaiter(_this, void 0, void 0, function () {
+            var paste;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        paste = this.props.paste;
+                        if (!paste || !paste.saveImage) {
+                            return [2 /*return*/];
+                        }
+                        return [4 /*yield*/, this.commandOrchestrator.executePasteCommand(event)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        _this.handleDrop = function (event) { return __awaiter(_this, void 0, void 0, function () {
+            var paste;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        paste = this.props.paste;
+                        if (!paste || !paste.saveImage) {
+                            return [2 /*return*/];
+                        }
+                        return [4 /*yield*/, this.commandOrchestrator.executeDropCommand(event)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        _this.handleImageSelection = function (event) { return __awaiter(_this, void 0, void 0, function () {
+            var paste;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        paste = this.props.paste;
+                        if (!paste || !paste.saveImage) {
+                            return [2 /*return*/];
+                        }
+                        return [4 /*yield*/, this.commandOrchestrator.executeSelectImageCommand(event)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        _this.handleTabChange = function (newTab) {
+            var onTabChange = _this.props.onTabChange;
+            onTabChange(newTab);
+        };
+        _this.handleCommand = function (commandName) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.commandOrchestrator.executeCommand(commandName)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        _this.finalRefs = __assign({}, (props.refs || {}));
+        if (!_this.finalRefs.textarea) {
+            _this.finalRefs.textarea = React.createRef();
+        }
+        if (!_this.finalRefs.preview) {
+            _this.finalRefs.preview = React.createRef();
+        }
+        _this.commandOrchestrator = new command_orchestrator_1.CommandOrchestrator(_this.props.commands, _this.finalRefs.textarea, _this.props.l18n, _this.props.paste
+            ? __assign(__assign({}, pasteOptionDefaults), _this.props.paste) : undefined);
+        var minEditorHeight = Math.min(props.maxEditorHeight, props.minEditorHeight);
+        _this.state = {
+            editorHeight: (_a = props.initialEditorHeight) !== null && _a !== void 0 ? _a : minEditorHeight
+        };
+        return _this;
+    }
+    ReactMde.prototype.render = function () {
+        var _this = this;
+        var _a, _b;
+        var _c = this.props, getIcon = _c.getIcon, toolbarCommands = _c.toolbarCommands, classes = _c.classes, loadingPreview = _c.loadingPreview, readOnly = _c.readOnly, disablePreview = _c.disablePreview, value = _c.value, l18n = _c.l18n, minPreviewHeight = _c.minPreviewHeight, heightUnits = _c.heightUnits, childProps = _c.childProps, selectedTab = _c.selectedTab, generateMarkdownPreview = _c.generateMarkdownPreview, loadSuggestions = _c.loadSuggestions, suggestionTriggerCharacters = _c.suggestionTriggerCharacters, textAreaComponent = _c.textAreaComponent;
+        var finalChildProps = childProps || {};
+        var toolbarButtons = toolbarCommands.map(function (group) {
+            return group.map(function (commandName) {
+                var command = _this.commandOrchestrator.getCommand(commandName);
+                return {
+                    commandName: commandName,
+                    buttonContent: command.icon
+                        ? command.icon(getIcon)
+                        : getIcon(commandName),
+                    buttonProps: command.buttonProps,
+                    buttonComponentClass: command.buttonComponentClass
+                };
+            });
+        });
+        return (React.createElement("div", { className: ClassNames_1.classNames("react-mde", "react-mde-tabbed-layout", classes === null || classes === void 0 ? void 0 : classes.reactMde) },
+            React.createElement(_1.Toolbar, { classes: classes === null || classes === void 0 ? void 0 : classes.toolbar, buttons: toolbarButtons, onCommand: this.handleCommand, onTabChange: this.handleTabChange, tab: selectedTab, readOnly: readOnly, disablePreview: disablePreview, l18n: l18n, buttonProps: finalChildProps.commandButtons, writeButtonProps: finalChildProps.writeButton, previewButtonProps: finalChildProps.previewButton }),
+            React.createElement("div", { className: ClassNames_1.classNames({ invisible: selectedTab !== "write" }) },
+                React.createElement(_1.TextArea, { classes: classes === null || classes === void 0 ? void 0 : classes.textArea, suggestionsDropdownClasses: classes === null || classes === void 0 ? void 0 : classes.suggestionsDropdown, suggestionsAutoplace: this.props.suggestionsAutoplace, refObject: this.finalRefs.textarea, onChange: this.handleTextChange, onPaste: this.handlePaste, onDrop: this.handleDrop, readOnly: readOnly, textAreaComponent: textAreaComponent, textAreaProps: childProps && childProps.textArea, height: this.state.editorHeight, heightUnits: this.props.heightUnits, value: value, suggestionTriggerCharacters: suggestionTriggerCharacters, loadSuggestions: loadSuggestions, onPossibleKeyCommand: this.commandOrchestrator.handlePossibleKeyCommand }),
+                this.props.paste && (React.createElement("label", { className: ClassNames_1.classNames("image-tip") },
+                    React.createElement("input", { className: ClassNames_1.classNames("image-input"), type: "file", accept: (_a = this.props.paste.accept) !== null && _a !== void 0 ? _a : pasteOptionDefaults.accept, multiple: (_b = this.props.paste.multiple) !== null && _b !== void 0 ? _b : pasteOptionDefaults.multiple, onChange: this.handleImageSelection }),
+                    React.createElement("span", null, l18n.pasteDropSelect)))),
+            selectedTab !== "write" && (React.createElement(_1.Preview, { classes: classes === null || classes === void 0 ? void 0 : classes.preview, refObject: this.finalRefs.preview, loadingPreview: loadingPreview, minHeight: minPreviewHeight, heightUnits: heightUnits, generateMarkdownPreview: generateMarkdownPreview, markdown: value }))));
+    };
+    ReactMde.defaultProps = {
+        commands: defaults_1.getDefaultCommandMap(),
+        toolbarCommands: defaults_1.getDefaultToolbarCommands(),
+        getIcon: function (name) { return React.createElement(icons_1.SvgIcon, { icon: name }); },
+        readOnly: false,
+        l18n: react_mde_en_1.enL18n,
+        minEditorHeight: 200,
+        maxEditorHeight: 500,
+        minPreviewHeight: 200,
+        heightUnits: "px",
+        selectedTab: "write",
+        disablePreview: false,
+        suggestionTriggerCharacters: ["@"],
+        suggestionsAutoplace: false
+    };
+    return ReactMde;
+}(React.Component));
+exports.ReactMde = ReactMde;
+
+
+/***/ }),
+/* 48 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TextArea = void 0;
+var React = __webpack_require__(0);
+var ClassNames_1 = __webpack_require__(3);
+var TextAreaCaretPosition_1 = __webpack_require__(53);
+var InsertTextAtPosition_1 = __webpack_require__(16);
+var Math_1 = __webpack_require__(52);
+var SuggestionsDropdown_1 = __webpack_require__(9);
+var TextArea = /** @class */ (function (_super) {
+    __extends(TextArea, _super);
+    function TextArea(props) {
+        var _this = _super.call(this, props) || this;
+        _this.currentLoadSuggestionsPromise = Promise.resolve(undefined);
+        /**
+         * suggestionsPromiseIndex exists as a means to cancel what happens when the suggestions promise finishes loading.
+         *
+         * When the user is searching for suggestions, there is a promise that, when resolved, causes a re-render.
+         * However, in case there is another promise to be resolved after the current one, it does not make sense to re-render
+         * only to re-render again after the next one is complete.
+         *
+         * When there is a promise loading and the user cancels the suggestion, you don't want the status to go back to "active"
+         * when the promise resolves.
+         *
+         * suggestionsPromiseIndex increments every time the mentions query
+         */
+        _this.suggestionsPromiseIndex = 0;
+        _this.getTextArea = function () {
+            return _this.props.refObject.current;
+        };
+        _this.handleOnChange = function (event) {
+            var onChange = _this.props.onChange;
+            onChange(event.target.value);
+        };
+        _this.handleBlur = function () {
+            var mention = _this.state.mention;
+            if (mention) {
+                _this.setState({ mention: { status: "inactive", suggestions: [] } });
+            }
+        };
+        _this.startLoadingSuggestions = function (text) {
+            var promiseIndex = ++_this.suggestionsPromiseIndex;
+            var loadSuggestions = _this.props.loadSuggestions;
+            _this.currentLoadSuggestionsPromise = _this.currentLoadSuggestionsPromise
+                .then(function () { return loadSuggestions(text, _this.state.mention.triggeredBy); })
+                .then(function (suggestions) {
+                if (_this.state.mention.status === "inactive") {
+                    // This means this promise resolved too late when the status has already been set to inactice
+                    return;
+                }
+                else if (_this.suggestionsPromiseIndex === promiseIndex) {
+                    if (!suggestions || !suggestions.length) {
+                        _this.setState({
+                            mention: {
+                                status: "inactive",
+                                suggestions: []
+                            }
+                        });
+                    }
+                    else {
+                        _this.setState({
+                            mention: __assign(__assign({}, _this.state.mention), { status: "active", suggestions: suggestions, focusIndex: 0 })
+                        });
+                    }
+                    _this.suggestionsPromiseIndex = 0;
+                }
+                return Promise.resolve();
+            });
+        };
+        _this.loadEmptySuggestion = function (target, key) {
+            var caret = TextAreaCaretPosition_1.getCaretCoordinates(target, key);
+            _this.startLoadingSuggestions("");
+            _this.setState({
+                mention: {
+                    status: "loading",
+                    startPosition: target.selectionStart + 1,
+                    caret: caret,
+                    suggestions: [],
+                    triggeredBy: key
+                }
+            });
+        };
+        _this.handleSuggestionSelected = function (index) {
+            var mention = _this.state.mention;
+            _this.getTextArea().selectionStart = mention.startPosition - 1;
+            var textForInsert = _this.props.value.substr(_this.getTextArea().selectionStart, _this.getTextArea().selectionEnd - _this.getTextArea().selectionStart);
+            InsertTextAtPosition_1.insertText(_this.getTextArea(), mention.suggestions[index].value + " ");
+            _this.setState({
+                mention: {
+                    status: "inactive",
+                    suggestions: []
+                }
+            });
+        };
+        _this.handleKeyDown = function (event) {
+            if (_this.props.onPossibleKeyCommand) {
+                var handled = _this.props.onPossibleKeyCommand(event);
+                if (handled) {
+                    event.preventDefault();
+                    // If the keydown resulted in a command being executed, we will just close the suggestions if they are open.
+                    // Resetting suggestionsPromiseIndex will cause any promise that is yet to be resolved to have no effect
+                    // when they finish loading.
+                    // TODO: The code below is duplicate, we need to clean this up
+                    _this.suggestionsPromiseIndex = 0;
+                    _this.setState({
+                        mention: {
+                            status: "inactive",
+                            suggestions: []
+                        }
+                    });
+                    return;
+                }
+            }
+            if (!_this.suggestionsEnabled()) {
+                return;
+            }
+            var key = event.key, shiftKey = event.shiftKey, currentTarget = event.currentTarget;
+            var selectionStart = currentTarget.selectionStart;
+            var mention = _this.state.mention;
+            switch (mention.status) {
+                case "loading":
+                case "active":
+                    if (key === "Escape" ||
+                        (key === "Backspace" &&
+                            selectionStart <= _this.state.mention.startPosition)) {
+                        // resetting suggestionsPromiseIndex will cause any promise that is yet to be resolved to have no effect
+                        // when they finish loading.
+                        _this.suggestionsPromiseIndex = 0;
+                        _this.setState({
+                            mention: {
+                                status: "inactive",
+                                suggestions: []
+                            }
+                        });
+                    }
+                    else if (mention.status === "active" &&
+                        (key === "ArrowUp" || key === "ArrowDown") &&
+                        !shiftKey) {
+                        event.preventDefault();
+                        var focusDelta = key === "ArrowUp" ? -1 : 1;
+                        _this.setState({
+                            mention: __assign(__assign({}, mention), { focusIndex: Math_1.mod(mention.focusIndex + focusDelta, mention.suggestions.length) })
+                        });
+                    }
+                    else if (key === "Enter" &&
+                        mention.status === "active" &&
+                        mention.suggestions.length) {
+                        event.preventDefault();
+                        _this.handleSuggestionSelected(mention.focusIndex);
+                    }
+                    break;
+                default:
+                // Ignore
+            }
+        };
+        _this.handleKeyUp = function (event) {
+            var key = event.key;
+            var mention = _this.state.mention;
+            var _a = _this.props, suggestionTriggerCharacters = _a.suggestionTriggerCharacters, value = _a.value;
+            switch (mention.status) {
+                case "loading":
+                case "active":
+                    if (key === "Backspace") {
+                        var searchText = value.substr(mention.startPosition, _this.getTextArea().selectionStart - mention.startPosition);
+                        _this.startLoadingSuggestions(searchText);
+                        if (mention.status !== "loading") {
+                            _this.setState({
+                                mention: __assign(__assign({}, _this.state.mention), { status: "loading" })
+                            });
+                        }
+                    }
+                    break;
+                case "inactive":
+                    if (key === "Backspace") {
+                        var prevChar = value.charAt(_this.getTextArea().selectionStart - 1);
+                        var isAtMention = suggestionTriggerCharacters.includes(value.charAt(_this.getTextArea().selectionStart - 1));
+                        if (isAtMention) {
+                            _this.loadEmptySuggestion(event.currentTarget, prevChar);
+                        }
+                    }
+                    break;
+                default:
+                // Ignore
+            }
+        };
+        _this.handleKeyPress = function (event) {
+            var _a = _this.props, suggestionTriggerCharacters = _a.suggestionTriggerCharacters, value = _a.value;
+            var mention = _this.state.mention;
+            var key = event.key;
+            switch (mention.status) {
+                case "loading":
+                case "active":
+                    if (key === " ") {
+                        _this.setState({
+                            mention: __assign(__assign({}, _this.state.mention), { status: "inactive" })
+                        });
+                        return;
+                    }
+                    var searchText = value.substr(mention.startPosition, _this.getTextArea().selectionStart - mention.startPosition) + key;
+                    // In this case, the mentions box was open but the user typed something else
+                    _this.startLoadingSuggestions(searchText);
+                    if (mention.status !== "loading") {
+                        _this.setState({
+                            mention: __assign(__assign({}, _this.state.mention), { status: "loading" })
+                        });
+                    }
+                    break;
+                case "inactive":
+                    if (suggestionTriggerCharacters.indexOf(event.key) === -1 ||
+                        !/\s|\(|\[|^.{0}$/.test(value.charAt(_this.getTextArea().selectionStart - 1))) {
+                        return;
+                    }
+                    _this.loadEmptySuggestion(event.currentTarget, event.key);
+                    break;
+            }
+        };
+        _this.state = { mention: { status: "inactive", suggestions: [] } };
+        return _this;
+    }
+    TextArea.prototype.suggestionsEnabled = function () {
+        return (this.props.suggestionTriggerCharacters &&
+            this.props.suggestionTriggerCharacters.length &&
+            this.props.loadSuggestions);
+    };
+    TextArea.prototype.render = function () {
+        var _this = this;
+        var _a = this.props, classes = _a.classes, readOnly = _a.readOnly, textAreaProps = _a.textAreaProps, height = _a.height, heightUnits = _a.heightUnits, value = _a.value, suggestionTriggerCharacters = _a.suggestionTriggerCharacters, loadSuggestions = _a.loadSuggestions, suggestionsDropdownClasses = _a.suggestionsDropdownClasses, textAreaComponent = _a.textAreaComponent, onPaste = _a.onPaste, onDrop = _a.onDrop;
+        var suggestionsEnabled = suggestionTriggerCharacters &&
+            suggestionTriggerCharacters.length &&
+            loadSuggestions;
+        var mention = this.state.mention;
+        var TextAreaComponent = (textAreaComponent ||
+            "textarea");
+        var heightVal = height && heightUnits ? height + heightUnits : height;
+        return (React.createElement("div", { className: "mde-textarea-wrapper" },
+            React.createElement(TextAreaComponent, __assign({ className: ClassNames_1.classNames("mde-text", classes), style: { height: heightVal }, ref: this.props.refObject, readOnly: readOnly, value: value, "data-testid": "text-area" }, textAreaProps, { onChange: function (event) {
+                    var _a;
+                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onChange) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
+                    _this.handleOnChange(event);
+                }, onBlur: function (event) {
+                    var _a;
+                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onBlur) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
+                    if (suggestionsEnabled) {
+                        _this.handleBlur();
+                    }
+                }, onKeyDown: function (event) {
+                    var _a;
+                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onKeyDown) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
+                    _this.handleKeyDown(event);
+                }, onKeyUp: function (event) {
+                    var _a;
+                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onKeyUp) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
+                    if (suggestionsEnabled) {
+                        _this.handleKeyUp(event);
+                    }
+                }, onKeyPress: function (event) {
+                    var _a;
+                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onKeyPress) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
+                    if (suggestionsEnabled) {
+                        _this.handleKeyPress(event);
+                    }
+                }, onPaste: function (event) {
+                    var _a;
+                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onPaste) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
+                    onPaste(event);
+                }, onDragOver: function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }, onDrop: function (event) {
+                    var _a;
+                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onDrop) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
+                    onDrop(event);
+                    event.preventDefault();
+                } })),
+            mention.status === "active" && mention.suggestions.length && (React.createElement(SuggestionsDropdown_1.SuggestionsDropdown, { classes: suggestionsDropdownClasses, caret: mention.caret, suggestions: mention.suggestions, onSuggestionSelected: this.handleSuggestionSelected, suggestionsAutoplace: this.props.suggestionsAutoplace, focusIndex: mention.focusIndex, textAreaRef: this.props.refObject }))));
+    };
+    return TextArea;
+}(React.Component));
+exports.TextArea = TextArea;
+
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Toolbar = void 0;
+var React = __webpack_require__(0);
+var ClassNames_1 = __webpack_require__(3);
+var ToolbarButtonGroup_1 = __webpack_require__(11);
+var ToolbarButton_1 = __webpack_require__(10);
+var Toolbar = /** @class */ (function (_super) {
+    __extends(Toolbar, _super);
+    function Toolbar() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.handleTabChange = function (tab) {
+            var onTabChange = _this.props.onTabChange;
+            onTabChange(tab);
+        };
+        return _this;
+    }
+    Toolbar.prototype.render = function () {
+        var _this = this;
+        var l18n = this.props.l18n;
+        var _a = this.props, classes = _a.classes, children = _a.children, buttons = _a.buttons, onCommand = _a.onCommand, readOnly = _a.readOnly, disablePreview = _a.disablePreview, writeButtonProps = _a.writeButtonProps, previewButtonProps = _a.previewButtonProps, buttonProps = _a.buttonProps;
+        if ((!buttons || buttons.length === 0) && !children) {
+            return null;
+        }
+        var writePreviewTabs = (React.createElement("div", { className: "mde-tabs" },
+            React.createElement("button", __assign({ type: "button", className: ClassNames_1.classNames({ selected: this.props.tab === "write" }), onClick: function () { return _this.handleTabChange("write"); } }, writeButtonProps), l18n.write),
+            React.createElement("button", __assign({ type: "button", className: ClassNames_1.classNames({ selected: this.props.tab === "preview" }), onClick: function () { return _this.handleTabChange("preview"); } }, previewButtonProps), l18n.preview)));
+        return (React.createElement("div", { className: ClassNames_1.classNames("mde-header", classes) },
+            !disablePreview && writePreviewTabs,
+            buttons.map(function (commandGroup, i) { return (React.createElement(ToolbarButtonGroup_1.ToolbarButtonGroup, { key: i, hidden: _this.props.tab === "preview" }, commandGroup.map(function (c, j) {
+                return (React.createElement(ToolbarButton_1.ToolbarButton, { key: j, name: c.commandName, buttonContent: c.buttonContent, buttonProps: __assign(__assign({}, (buttonProps || {})), c.buttonProps), onClick: function () { return onCommand(c.commandName); }, readOnly: readOnly, buttonComponentClass: c.buttonComponentClass }));
+            }))); })));
+    };
+    return Toolbar;
+}(React.Component));
+exports.Toolbar = Toolbar;
+
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SvgIcon = void 0;
+var React = __webpack_require__(0);
+var checkedListIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "tasks", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
+    React.createElement("path", { fill: "currentColor", d: "M208 132h288c8.8 0 16-7.2 16-16V76c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16v40c0 8.8 7.2 16 16 16zm0 160h288c8.8 0 16-7.2 16-16v-40c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16v40c0 8.8 7.2 16 16 16zm0 160h288c8.8 0 16-7.2 16-16v-40c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16v40c0 8.8 7.2 16 16 16zM64 368c-26.5 0-48.6 21.5-48.6 48s22.1 48 48.6 48 48-21.5 48-48-21.5-48-48-48zm92.5-299l-72.2 72.2-15.6 15.6c-4.7 4.7-12.9 4.7-17.6 0L3.5 109.4c-4.7-4.7-4.7-12.3 0-17l15.7-15.7c4.7-4.7 12.3-4.7 17 0l22.7 22.1 63.7-63.3c4.7-4.7 12.3-4.7 17 0l17 16.5c4.6 4.7 4.6 12.3-.1 17zm0 159.6l-72.2 72.2-15.7 15.7c-4.7 4.7-12.9 4.7-17.6 0L3.5 269c-4.7-4.7-4.7-12.3 0-17l15.7-15.7c4.7-4.7 12.3-4.7 17 0l22.7 22.1 63.7-63.7c4.7-4.7 12.3-4.7 17 0l17 17c4.6 4.6 4.6 12.2-.1 16.9z" })));
+var orderedListIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "list-ol", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
+    React.createElement("path", { fill: "currentColor", d: "M3.263 139.527c0-7.477 3.917-11.572 11.573-11.572h15.131V88.078c0-5.163.534-10.503.534-10.503h-.356s-1.779 2.67-2.848 3.738c-4.451 4.273-10.504 4.451-15.666-1.068l-5.518-6.231c-5.342-5.341-4.984-11.216.534-16.379l21.72-19.938C32.815 33.602 36.732 32 42.785 32H54.89c7.656 0 11.749 3.916 11.749 11.572v84.384h15.488c7.655 0 11.572 4.094 11.572 11.572v8.901c0 7.477-3.917 11.572-11.572 11.572H14.836c-7.656 0-11.573-4.095-11.573-11.572v-8.902zM2.211 304.591c0-47.278 50.955-56.383 50.955-69.165 0-7.18-5.954-8.755-9.28-8.755-3.153 0-6.479 1.051-9.455 3.852-5.079 4.903-10.507 7.004-16.111 2.451l-8.579-6.829c-5.779-4.553-7.18-9.805-2.803-15.409C13.592 201.981 26.025 192 47.387 192c19.437 0 44.476 10.506 44.476 39.573 0 38.347-46.753 46.402-48.679 56.909h39.049c7.529 0 11.557 4.027 11.557 11.382v8.755c0 7.354-4.028 11.382-11.557 11.382h-67.94c-7.005 0-12.083-4.028-12.083-11.382v-4.028zM5.654 454.61l5.603-9.28c3.853-6.654 9.105-7.004 15.584-3.152 4.903 2.101 9.63 3.152 14.359 3.152 10.155 0 14.358-3.502 14.358-8.23 0-6.654-5.604-9.106-15.934-9.106h-4.728c-5.954 0-9.28-2.101-12.258-7.88l-1.05-1.926c-2.451-4.728-1.226-9.806 2.801-14.884l5.604-7.004c6.829-8.405 12.257-13.483 12.257-13.483v-.35s-4.203 1.051-12.608 1.051H16.685c-7.53 0-11.383-4.028-11.383-11.382v-8.755c0-7.53 3.853-11.382 11.383-11.382h58.484c7.529 0 11.382 4.027 11.382 11.382v3.327c0 5.778-1.401 9.806-5.079 14.183l-17.509 20.137c19.611 5.078 28.716 20.487 28.716 34.845 0 21.363-14.358 44.126-48.503 44.126-16.636 0-28.192-4.728-35.896-9.455-5.779-4.202-6.304-9.805-2.626-15.934zM144 132h352c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z" })));
+var unorderedListIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "list-ul", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
+    React.createElement("path", { fill: "currentColor", d: "M96 96c0 26.51-21.49 48-48 48S0 122.51 0 96s21.49-48 48-48 48 21.49 48 48zM48 208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm0 160c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm96-236h352c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z" })));
+var imageIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "image", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
+    React.createElement("path", { fill: "currentColor", d: "M464 448H48c-26.51 0-48-21.49-48-48V112c0-26.51 21.49-48 48-48h416c26.51 0 48 21.49 48 48v288c0 26.51-21.49 48-48 48zM112 120c-30.928 0-56 25.072-56 56s25.072 56 56 56 56-25.072 56-56-25.072-56-56-56zM64 384h384V272l-87.515-87.515c-4.686-4.686-12.284-4.686-16.971 0L208 320l-55.515-55.515c-4.686-4.686-12.284-4.686-16.971 0L64 336v48z" })));
+var codeIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "code", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 640 512", "data-fa-i2svg": "" },
+    React.createElement("path", { fill: "currentColor", d: "M278.9 511.5l-61-17.7c-6.4-1.8-10-8.5-8.2-14.9L346.2 8.7c1.8-6.4 8.5-10 14.9-8.2l61 17.7c6.4 1.8 10 8.5 8.2 14.9L293.8 503.3c-1.9 6.4-8.5 10.1-14.9 8.2zm-114-112.2l43.5-46.4c4.6-4.9 4.3-12.7-.8-17.2L117 256l90.6-79.7c5.1-4.5 5.5-12.3.8-17.2l-43.5-46.4c-4.5-4.8-12.1-5.1-17-.5L3.8 247.2c-5.1 4.7-5.1 12.8 0 17.5l144.1 135.1c4.9 4.6 12.5 4.4 17-.5zm327.2.6l144.1-135.1c5.1-4.7 5.1-12.8 0-17.5L492.1 112.1c-4.8-4.5-12.4-4.3-17 .5L431.6 159c-4.6 4.9-4.3 12.7.8 17.2L523 256l-90.6 79.7c-5.1 4.5-5.5 12.3-.8 17.2l43.5 46.4c4.5 4.9 12.1 5.1 17 .6z" })));
+var quoteIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "quote-right", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
+    React.createElement("path", { fill: "currentColor", d: "M512 80v128c0 137.018-63.772 236.324-193.827 271.172-15.225 4.08-30.173-7.437-30.173-23.199v-33.895c0-10.057 6.228-19.133 15.687-22.55C369.684 375.688 408 330.054 408 256h-72c-26.51 0-48-21.49-48-48V80c0-26.51 21.49-48 48-48h128c26.51 0 48 21.49 48 48zM176 32H48C21.49 32 0 53.49 0 80v128c0 26.51 21.49 48 48 48h72c0 74.054-38.316 119.688-104.313 143.528C6.228 402.945 0 412.021 0 422.078v33.895c0 15.762 14.948 27.279 30.173 23.199C160.228 444.324 224 345.018 224 208V80c0-26.51-21.49-48-48-48z" })));
+var linkIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "link", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
+    React.createElement("path", { fill: "currentColor", d: "M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z" })));
+var strikeThroughIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "strikethrough", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
+    React.createElement("path", { fill: "currentColor", d: "M496 288H16c-8.837 0-16-7.163-16-16v-32c0-8.837 7.163-16 16-16h480c8.837 0 16 7.163 16 16v32c0 8.837-7.163 16-16 16zm-214.666 16c27.258 12.937 46.524 28.683 46.524 56.243 0 33.108-28.977 53.676-75.621 53.676-32.325 0-76.874-12.08-76.874-44.271V368c0-8.837-7.164-16-16-16H113.75c-8.836 0-16 7.163-16 16v19.204c0 66.845 77.717 101.82 154.487 101.82 88.578 0 162.013-45.438 162.013-134.424 0-19.815-3.618-36.417-10.143-50.6H281.334zm-30.952-96c-32.422-13.505-56.836-28.946-56.836-59.683 0-33.92 30.901-47.406 64.962-47.406 42.647 0 64.962 16.593 64.962 32.985V136c0 8.837 7.164 16 16 16h45.613c8.836 0 16-7.163 16-16v-30.318c0-52.438-71.725-79.875-142.575-79.875-85.203 0-150.726 40.972-150.726 125.646 0 22.71 4.665 41.176 12.777 56.547h129.823z" })));
+var italicIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "italic", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 320 512", "data-fa-i2svg": "" },
+    React.createElement("path", { fill: "currentColor", d: "M204.758 416h-33.849l62.092-320h40.725a16 16 0 0 0 15.704-12.937l6.242-32C297.599 41.184 290.034 32 279.968 32H120.235a16 16 0 0 0-15.704 12.937l-6.242 32C96.362 86.816 103.927 96 113.993 96h33.846l-62.09 320H46.278a16 16 0 0 0-15.704 12.935l-6.245 32C22.402 470.815 29.967 480 40.034 480h158.479a16 16 0 0 0 15.704-12.935l6.245-32c1.927-9.88-5.638-19.065-15.704-19.065z" })));
+var headerIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "heading", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
+    React.createElement("path", { fill: "currentColor", d: "M496 80V48c0-8.837-7.163-16-16-16H320c-8.837 0-16 7.163-16 16v32c0 8.837 7.163 16 16 16h37.621v128H154.379V96H192c8.837 0 16-7.163 16-16V48c0-8.837-7.163-16-16-16H32c-8.837 0-16 7.163-16 16v32c0 8.837 7.163 16 16 16h37.275v320H32c-8.837 0-16 7.163-16 16v32c0 8.837 7.163 16 16 16h160c8.837 0 16-7.163 16-16v-32c0-8.837-7.163-16-16-16h-37.621V288H357.62v128H320c-8.837 0-16 7.163-16 16v32c0 8.837 7.163 16 16 16h160c8.837 0 16-7.163 16-16v-32c0-8.837-7.163-16-16-16h-37.275V96H480c8.837 0 16-7.163 16-16z" })));
+var boldIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "bold", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 384 512", "data-fa-i2svg": "" },
+    React.createElement("path", { fill: "currentColor", d: "M304.793 243.891c33.639-18.537 53.657-54.16 53.657-95.693 0-48.236-26.25-87.626-68.626-104.179C265.138 34.01 240.849 32 209.661 32H24c-8.837 0-16 7.163-16 16v33.049c0 8.837 7.163 16 16 16h33.113v318.53H24c-8.837 0-16 7.163-16 16V464c0 8.837 7.163 16 16 16h195.69c24.203 0 44.834-1.289 66.866-7.584C337.52 457.193 376 410.647 376 350.014c0-52.168-26.573-91.684-71.207-106.123zM142.217 100.809h67.444c16.294 0 27.536 2.019 37.525 6.717 15.828 8.479 24.906 26.502 24.906 49.446 0 35.029-20.32 56.79-53.029 56.79h-76.846V100.809zm112.642 305.475c-10.14 4.056-22.677 4.907-31.409 4.907h-81.233V281.943h84.367c39.645 0 63.057 25.38 63.057 63.057.001 28.425-13.66 52.483-34.782 61.284z" })));
+var SvgIcon = function (_a) {
+    var icon = _a.icon;
+    switch (icon) {
+        case "header":
+            return headerIcon;
+        case "bold":
+            return boldIcon;
+        case "italic":
+            return italicIcon;
+        case "strikethrough":
+            return strikeThroughIcon;
+        case "link":
+            return linkIcon;
+        case "quote":
+            return quoteIcon;
+        case "code":
+            return codeIcon;
+        case "image":
+            return imageIcon;
+        case "unordered-list":
+            return unorderedListIcon;
+        case "ordered-list":
+            return orderedListIcon;
+        case "checked-list":
+            return checkedListIcon;
+        default:
+            return null;
+    }
+};
+exports.SvgIcon = SvgIcon;
+
+
+/***/ }),
+/* 51 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.enL18n = void 0;
+exports.enL18n = {
+    write: "Write",
+    preview: "Preview",
+    uploadingImage: "Uploading image...",
+    pasteDropSelect: "Attach files by dragging & dropping, selecting or pasting them."
+};
+
+
+/***/ }),
+/* 52 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.mod = void 0;
+/**
+ * Calculates modulus, like %, except that it works with negative numbers
+ */
+function mod(n, m) {
+    return ((n % m) + m) % m;
+}
+exports.mod = mod;
+
+
+/***/ }),
+/* 53 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/* jshint browser: true */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getCaretCoordinates = void 0;
+// We'll copy the properties below into the mirror div.
+// Note that some browsers, such as Firefox, do not concatenate properties
+// into their shorthand (e.g. padding-top, padding-bottom etc. -> padding),
+// so we have to list every single property explicitly.
+var properties = [
+    "direction",
+    "boxSizing",
+    "width",
+    "height",
+    "overflowX",
+    "overflowY",
+    "borderTopWidth",
+    "borderRightWidth",
+    "borderBottomWidth",
+    "borderLeftWidth",
+    "borderStyle",
+    "paddingTop",
+    "paddingRight",
+    "paddingBottom",
+    "paddingLeft",
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/font
+    "fontStyle",
+    "fontVariant",
+    "fontWeight",
+    "fontStretch",
+    "fontSize",
+    "fontSizeAdjust",
+    "lineHeight",
+    "fontFamily",
+    "textAlign",
+    "textTransform",
+    "textIndent",
+    "textDecoration",
+    "letterSpacing",
+    "wordSpacing",
+    "tabSize",
+    "MozTabSize"
+];
+var isBrowser = typeof window !== "undefined";
+var isFirefox = isBrowser && window.mozInnerScreenX != null;
+function getCaretCoordinates(element, append) {
+    if (!isBrowser) {
+        throw new Error("getCaretCoordinates should only be called in a browser");
+    }
+    // The mirror div will replicate the textarea's style
+    var div = document.createElement("div");
+    div.id = "input-textarea-caret-position-mirror-div";
+    document.body.appendChild(div);
+    var style = div.style;
+    var computed = window.getComputedStyle
+        ? window.getComputedStyle(element)
+        : element.currentStyle; // currentStyle for IE < 9
+    // Default textarea styles
+    style.whiteSpace = "pre-wrap";
+    style.wordWrap = "break-word"; // only for textarea-s
+    // Position off-screen
+    style.position = "absolute"; // required to return coordinates properly
+    style.visibility = "hidden"; // not 'display: none' because we want rendering
+    // Transfer the element's properties to the div
+    properties.forEach(function (prop) {
+        style[prop] = computed[prop];
+    });
+    if (isFirefox) {
+        // Firefox lies about the overflow property for textareas: https://bugzilla.mozilla.org/show_bug.cgi?id=984275
+        if (element.scrollHeight > parseInt(computed.height))
+            style.overflowY = "scroll";
+    }
+    else {
+        style.overflow = "hidden"; // for Chrome to not render a scrollbar; IE keeps overflowY = 'scroll'
+    }
+    div.textContent = element.value.substring(0, element.selectionStart);
+    if (append) {
+        div.textContent += append;
+    }
+    var span = document.createElement("span");
+    // Wrapping must be replicated *exactly*, including when a long word gets
+    // onto the next line, with whitespace at the end of the line before (#7).
+    // The  *only* reliable way to do that is to copy the *entire* rest of the
+    // textarea's content into the <span> created at the caret position.
+    // For inputs, just '.' would be enough, but no need to bother.
+    span.textContent = element.value.substring(element.selectionEnd) || "."; // || because a completely empty faux span doesn't render at all
+    div.appendChild(span);
+    var coordinates = {
+        top: span.offsetTop + parseInt(computed["borderTopWidth"]),
+        left: span.offsetLeft + parseInt(computed["borderLeftWidth"]),
+        lineHeight: parseInt(computed["lineHeight"])
+    };
+    document.body.removeChild(div);
+    return coordinates;
+}
+exports.getCaretCoordinates = getCaretCoordinates;
+
+
+/***/ }),
+/* 54 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.readFileAsync = void 0;
+/**
+ * Reads a file and returns an ArrayBuffer
+ * @param file
+ */
+function readFileAsync(file) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, new Promise(function (resolve, reject) {
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        if (typeof reader.result === "string") {
+                            throw new Error("reader.result is expected to be an ArrayBuffer");
+                        }
+                        resolve(reader.result);
+                    };
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(file);
+                })];
+        });
+    });
+}
+exports.readFileAsync = readFileAsync;
+
+
+/***/ }),
+/* 55 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_split_js__ = __webpack_require__(64);
+
+
+
+
+function objectWithoutProperties (obj, exclude) { var target = {}; for (var k in obj) if (Object.prototype.hasOwnProperty.call(obj, k) && exclude.indexOf(k) === -1) target[k] = obj[k]; return target; }
+
+var SplitWrapper = /*@__PURE__*/(function (superclass) {
+    function SplitWrapper () {
+        superclass.apply(this, arguments);
+    }
+
+    if ( superclass ) SplitWrapper.__proto__ = superclass;
+    SplitWrapper.prototype = Object.create( superclass && superclass.prototype );
+    SplitWrapper.prototype.constructor = SplitWrapper;
+
+    SplitWrapper.prototype.componentDidMount = function componentDidMount () {
+        var ref = this.props;
+        ref.children;
+        var gutter = ref.gutter;
+        var rest = objectWithoutProperties( ref, ["children", "gutter"] );
+        var options = rest;
+
+        options.gutter = function (index, direction) {
+            var gutterElement;
+
+            if (gutter) {
+                gutterElement = gutter(index, direction);
+            } else {
+                gutterElement = document.createElement('div');
+                gutterElement.className = "gutter gutter-" + direction;
+            }
+
+            // eslint-disable-next-line no-underscore-dangle
+            gutterElement.__isSplitGutter = true;
+            return gutterElement
+        };
+
+        this.split = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_split_js__["a" /* default */])(this.parent.children, options);
+    };
+
+    SplitWrapper.prototype.componentDidUpdate = function componentDidUpdate (prevProps) {
+        var this$1 = this;
+
+        var ref = this.props;
+        ref.children;
+        var minSize = ref.minSize;
+        var sizes = ref.sizes;
+        var collapsed = ref.collapsed;
+        var rest = objectWithoutProperties( ref, ["children", "minSize", "sizes", "collapsed"] );
+        var options = rest;
+        var prevMinSize = prevProps.minSize;
+        var prevSizes = prevProps.sizes;
+        var prevCollapsed = prevProps.collapsed;
+
+        var otherProps = [
+            'maxSize',
+            'expandToMin',
+            'gutterSize',
+            'gutterAlign',
+            'snapOffset',
+            'dragInterval',
+            'direction',
+            'cursor' ];
+
+        var needsRecreate = otherProps
+            // eslint-disable-next-line react/destructuring-assignment
+            .map(function (prop) { return this$1.props[prop] !== prevProps[prop]; })
+            .reduce(function (accum, same) { return accum || same; }, false);
+
+        // Compare minSize when both are arrays, when one is an array and when neither is an array
+        if (Array.isArray(minSize) && Array.isArray(prevMinSize)) {
+            var minSizeChanged = false;
+
+            minSize.forEach(function (minSizeI, i) {
+                minSizeChanged = minSizeChanged || minSizeI !== prevMinSize[i];
+            });
+
+            needsRecreate = needsRecreate || minSizeChanged;
+        } else if (Array.isArray(minSize) || Array.isArray(prevMinSize)) {
+            needsRecreate = true;
+        } else {
+            needsRecreate = needsRecreate || minSize !== prevMinSize;
+        }
+
+        // Destroy and re-create split if options changed
+        if (needsRecreate) {
+            options.minSize = minSize;
+            options.sizes = sizes || this.split.getSizes();
+            this.split.destroy(true, true);
+            options.gutter = function (index, direction, pairB) { return pairB.previousSibling; };
+            this.split = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_split_js__["a" /* default */])(
+                Array.from(this.parent.children).filter(
+                    // eslint-disable-next-line no-underscore-dangle
+                    function (element) { return !element.__isSplitGutter; }
+                ),
+                options
+            );
+        } else if (sizes) {
+            // If only the size has changed, set the size. No need to do this if re-created.
+            var sizeChanged = false;
+
+            sizes.forEach(function (sizeI, i) {
+                sizeChanged = sizeChanged || sizeI !== prevSizes[i];
+            });
+
+            if (sizeChanged) {
+                // eslint-disable-next-line react/destructuring-assignment
+                this.split.setSizes(this.props.sizes);
+            }
+        }
+
+        // Collapse after re-created or when collapsed changed.
+        if (
+            Number.isInteger(collapsed) &&
+            (collapsed !== prevCollapsed || needsRecreate)
+        ) {
+            this.split.collapse(collapsed);
+        }
+    };
+
+    SplitWrapper.prototype.componentWillUnmount = function componentWillUnmount () {
+        this.split.destroy();
+        delete this.split;
+    };
+
+    SplitWrapper.prototype.render = function render () {
+        var this$1 = this;
+
+        var ref = this.props;
+        ref.sizes;
+        ref.minSize;
+        ref.maxSize;
+        ref.expandToMin;
+        ref.gutterSize;
+        ref.gutterAlign;
+        ref.snapOffset;
+        ref.dragInterval;
+        ref.direction;
+        ref.cursor;
+        ref.gutter;
+        ref.elementStyle;
+        ref.gutterStyle;
+        ref.onDrag;
+        ref.onDragStart;
+        ref.onDragEnd;
+        ref.collapsed;
+        var children = ref.children;
+        var rest$1 = objectWithoutProperties( ref, ["sizes", "minSize", "maxSize", "expandToMin", "gutterSize", "gutterAlign", "snapOffset", "dragInterval", "direction", "cursor", "gutter", "elementStyle", "gutterStyle", "onDrag", "onDragStart", "onDragEnd", "collapsed", "children"] );
+        var rest = rest$1;
+
+        return (
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement( 'div', Object.assign({},
+                { ref: function (parent) {
+                    this$1.parent = parent;
+                } }, rest),
+                children
+            )
+        )
+    };
+
+    return SplitWrapper;
+}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component));
+
+SplitWrapper.propTypes = {
+    sizes: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number),
+    minSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.oneOfType([
+        __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+        __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number) ]),
+    maxSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.oneOfType([
+        __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+        __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number) ]),
+    expandToMin: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+    gutterSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    gutterAlign: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
+    snapOffset: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    dragInterval: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    direction: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
+    cursor: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
+    gutter: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+    elementStyle: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+    gutterStyle: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+    onDrag: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+    onDragStart: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+    onDragEnd: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+    collapsed: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    children: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.element),
+};
+
+SplitWrapper.defaultProps = {
+    sizes: undefined,
+    minSize: undefined,
+    maxSize: undefined,
+    expandToMin: undefined,
+    gutterSize: undefined,
+    gutterAlign: undefined,
+    snapOffset: undefined,
+    dragInterval: undefined,
+    direction: undefined,
+    cursor: undefined,
+    gutter: undefined,
+    elementStyle: undefined,
+    gutterStyle: undefined,
+    onDrag: undefined,
+    onDragStart: undefined,
+    onDragEnd: undefined,
+    collapsed: undefined,
+    children: undefined,
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (SplitWrapper);
+
+
+/***/ }),
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27169,7 +30961,7 @@ if (process.env.NODE_ENV !== "production") {
   (function() {
 'use strict';
 
-var _assign = __webpack_require__(1);
+var _assign = __webpack_require__(4);
 
 // TODO: this is special because it gets imported during build.
 var ReactVersion = '17.0.2';
@@ -29488,10 +33280,10 @@ exports.version = ReactVersion;
   })();
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 10 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29503,7 +33295,7 @@ exports.version = ReactVersion;
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-var l=__webpack_require__(1),n=60103,p=60106;exports.Fragment=60107;exports.StrictMode=60108;exports.Profiler=60114;var q=60109,r=60110,t=60112;exports.Suspense=60113;var u=60115,v=60116;
+var l=__webpack_require__(4),n=60103,p=60106;exports.Fragment=60107;exports.StrictMode=60108;exports.Profiler=60114;var q=60109,r=60110,t=60112;exports.Suspense=60113;var u=60115,v=60116;
 if("function"===typeof Symbol&&Symbol.for){var w=Symbol.for;n=w("react.element");p=w("react.portal");exports.Fragment=w("react.fragment");exports.StrictMode=w("react.strict_mode");exports.Profiler=w("react.profiler");q=w("react.provider");r=w("react.context");t=w("react.forward_ref");exports.Suspense=w("react.suspense");u=w("react.memo");v=w("react.lazy")}var x="function"===typeof Symbol&&Symbol.iterator;
 function y(a){if(null===a||"object"!==typeof a)return null;a=x&&a[x]||a["@@iterator"];return"function"===typeof a?a:null}function z(a){for(var b="https://reactjs.org/docs/error-decoder.html?invariant="+a,c=1;c<arguments.length;c++)b+="&args[]="+encodeURIComponent(arguments[c]);return"Minified React error #"+a+"; visit "+b+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings."}
 var A={isMounted:function(){return!1},enqueueForceUpdate:function(){},enqueueReplaceState:function(){},enqueueSetState:function(){}},B={};function C(a,b,c){this.props=a;this.context=b;this.refs=B;this.updater=c||A}C.prototype.isReactComponent={};C.prototype.setState=function(a,b){if("object"!==typeof a&&"function"!==typeof a&&null!=a)throw Error(z(85));this.updater.enqueueSetState(this,a,b,"setState")};C.prototype.forceUpdate=function(a){this.updater.enqueueForceUpdate(this,a,"forceUpdate")};
@@ -29521,7 +33313,7 @@ exports.useLayoutEffect=function(a,b){return S().useLayoutEffect(a,b)};exports.u
 
 
 /***/ }),
-/* 11 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29873,10 +33665,10 @@ exports.unstable_wrap = unstable_wrap;
   })();
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 12 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29892,7 +33684,7 @@ var b=0;exports.__interactionsRef=null;exports.__subscriberRef=null;exports.unst
 
 
 /***/ }),
-/* 13 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30543,10 +34335,10 @@ exports.unstable_wrapCallback = unstable_wrapCallback;
   })();
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 14 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30573,3795 +34365,19 @@ exports.unstable_wrapCallback=function(a){var b=P;return function(){var c=P;P=b;
 
 
 /***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(process) {
-
-if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(12);
-} else {
-  module.exports = __webpack_require__(11);
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBreaksNeededForEmptyLineAfter = exports.getBreaksNeededForEmptyLineBefore = exports.selectWord = exports.getSurroundingWord = void 0;
-function getSurroundingWord(text, position) {
-    if (!text)
-        throw Error("Argument 'text' should be truthy");
-    var isWordDelimiter = function (c) { return c === " " || c.charCodeAt(0) === 10; };
-    // leftIndex is initialized to 0 because if selection is 0, it won't even enter the iteration
-    var start = 0;
-    // rightIndex is initialized to text.length because if selection is equal to text.length it won't even enter the interation
-    var end = text.length;
-    // iterate to the left
-    for (var i = position; i - 1 > -1; i--) {
-        if (isWordDelimiter(text[i - 1])) {
-            start = i;
-            break;
-        }
-    }
-    // iterate to the right
-    for (var i = position; i < text.length; i++) {
-        if (isWordDelimiter(text[i])) {
-            end = i;
-            break;
-        }
-    }
-    return { start: start, end: end };
-}
-exports.getSurroundingWord = getSurroundingWord;
-/**
- * If the cursor is inside a word and (selection.start === selection.end)
- * returns a new Selection where the whole word is selected
- * @param text
- * @param selection
- */
-function selectWord(_a) {
-    var text = _a.text, selection = _a.selection;
-    if (text && text.length && selection.start === selection.end) {
-        // the user is pointing to a word
-        return getSurroundingWord(text, selection.start);
-    }
-    return selection;
-}
-exports.selectWord = selectWord;
-/**
- *  Gets the number of line-breaks that would have to be inserted before the given 'startPosition'
- *  to make sure there's an empty line between 'startPosition' and the previous text
- */
-function getBreaksNeededForEmptyLineBefore(text, startPosition) {
-    if (text === void 0) { text = ""; }
-    if (startPosition === 0)
-        return 0;
-    // rules:
-    // - If we're in the first line, no breaks are needed
-    // - Otherwise there must be 2 breaks before the previous character. Depending on how many breaks exist already, we
-    //      may need to insert 0, 1 or 2 breaks
-    var neededBreaks = 2;
-    var isInFirstLine = true;
-    for (var i = startPosition - 1; i >= 0 && neededBreaks >= 0; i--) {
-        switch (text.charCodeAt(i)) {
-            case 32: // blank space
-                continue;
-            case 10: // line break
-                neededBreaks--;
-                isInFirstLine = false;
-                break;
-            default:
-                return neededBreaks;
-        }
-    }
-    return isInFirstLine ? 0 : neededBreaks;
-}
-exports.getBreaksNeededForEmptyLineBefore = getBreaksNeededForEmptyLineBefore;
-/**
- *  Gets the number of line-breaks that would have to be inserted after the given 'startPosition'
- *  to make sure there's an empty line between 'startPosition' and the next text
- */
-function getBreaksNeededForEmptyLineAfter(text, startPosition) {
-    if (text === void 0) { text = ""; }
-    if (startPosition === text.length - 1)
-        return 0;
-    // rules:
-    // - If we're in the first line, no breaks are needed
-    // - Otherwise there must be 2 breaks before the previous character. Depending on how many breaks exist already, we
-    //      may need to insert 0, 1 or 2 breaks
-    var neededBreaks = 2;
-    var isInLastLine = true;
-    for (var i = startPosition; i < text.length && neededBreaks >= 0; i++) {
-        switch (text.charCodeAt(i)) {
-            case 32:
-                continue;
-            case 10: {
-                neededBreaks--;
-                isInLastLine = false;
-                break;
-            }
-            default:
-                return neededBreaks;
-        }
-    }
-    return isInLastLine ? 0 : neededBreaks;
-}
-exports.getBreaksNeededForEmptyLineAfter = getBreaksNeededForEmptyLineAfter;
-
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-/*!
-  Copyright (c) 2018 Jed Watson.
-  Licensed under the MIT License (MIT), see
-  http://jedwatson.github.io/classnames
-*/
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.classNames = void 0;
-function isString(classValue) {
-    return typeof classValue === "string";
-}
-function isNonEmptyArray(classValue) {
-    return Array.isArray(classValue) && classValue.length > 0;
-}
-function isClassDictionary(classValue) {
-    return typeof classValue === "object";
-}
-function classNames() {
-    var classValues = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        classValues[_i] = arguments[_i];
-    }
-    var classes = [];
-    for (var i = 0; i < classValues.length; i++) {
-        var classValue = classValues[i];
-        if (!classValue)
-            continue;
-        if (isString(classValue)) {
-            classes.push(classValue);
-        }
-        else if (isNonEmptyArray(classValue)) {
-            var inner = classNames.apply(null, classValue);
-            if (inner) {
-                classes.push(inner);
-            }
-        }
-        else if (isClassDictionary(classValue)) {
-            for (var key in classValue) {
-                if (classValue.hasOwnProperty(key) && classValue[key]) {
-                    classes.push(key);
-                }
-            }
-        }
-    }
-    return classes.join(" ");
-}
-exports.classNames = classNames;
-
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
-
-module.exports = ReactPropTypesSecret;
-
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDefaultSaveImageCommandName = exports.getDefaultCommandMap = exports.getDefaultToolbarCommands = void 0;
-var headerCommand_1 = __webpack_require__(45);
-var boldCommand_1 = __webpack_require__(43);
-var italicCommand_1 = __webpack_require__(47);
-var strikeThroughCommand_1 = __webpack_require__(52);
-var linkCommand_1 = __webpack_require__(48);
-var quoteCommand_1 = __webpack_require__(50);
-var codeCommand_1 = __webpack_require__(44);
-var listCommands_1 = __webpack_require__(49);
-var imageCommand_1 = __webpack_require__(46);
-var save_image_command_1 = __webpack_require__(51);
-function getDefaultToolbarCommands() {
-    return [
-        ["header", "bold", "italic", "strikethrough"],
-        ["link", "quote", "code", "image"],
-        ["unordered-list", "ordered-list", "checked-list"]
-    ];
-}
-exports.getDefaultToolbarCommands = getDefaultToolbarCommands;
-function getDefaultCommandMap() {
-    return {
-        header: headerCommand_1.headerCommand,
-        bold: boldCommand_1.boldCommand,
-        italic: italicCommand_1.italicCommand,
-        strikethrough: strikeThroughCommand_1.strikeThroughCommand,
-        link: linkCommand_1.linkCommand,
-        quote: quoteCommand_1.quoteCommand,
-        code: codeCommand_1.codeCommand,
-        image: imageCommand_1.imageCommand,
-        "unordered-list": listCommands_1.unorderedListCommand,
-        "ordered-list": listCommands_1.orderedListCommand,
-        "checked-list": listCommands_1.checkedListCommand,
-        "save-image": save_image_command_1.saveImageCommand
-    };
-}
-exports.getDefaultCommandMap = getDefaultCommandMap;
-function getDefaultSaveImageCommandName() {
-    return "save-image";
-}
-exports.getDefaultSaveImageCommandName = getDefaultSaveImageCommandName;
-
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports) {
-
-module.exports = Function.call.bind(Object.prototype.hasOwnProperty);
-
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(process) {
-
-if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(40);
-} else {
-  module.exports = __webpack_require__(39);
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SuggestionsDropdown = void 0;
-var React = __webpack_require__(2);
-var ClassNames_1 = __webpack_require__(17);
-var SuggestionsDropdown = function (_a) {
-    var classes = _a.classes, suggestions = _a.suggestions, caret = _a.caret, onSuggestionSelected = _a.onSuggestionSelected, suggestionsAutoplace = _a.suggestionsAutoplace, focusIndex = _a.focusIndex, textAreaRef = _a.textAreaRef;
-    var handleSuggestionClick = function (event) {
-        event.preventDefault();
-        var index = parseInt(event.currentTarget.attributes["data-index"].value);
-        onSuggestionSelected(index);
-    };
-    var handleMouseDown = function (event) { return event.preventDefault(); };
-    var vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-    var vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-    var left = caret.left - textAreaRef.current.scrollLeft;
-    var top = caret.top - textAreaRef.current.scrollTop;
-    var style = {};
-    if (suggestionsAutoplace &&
-        top + textAreaRef.current.getBoundingClientRect().top > vh / 2)
-        style.bottom = textAreaRef.current.offsetHeight - top;
-    else
-        style.top = top;
-    if (suggestionsAutoplace &&
-        left + textAreaRef.current.getBoundingClientRect().left > vw / 2)
-        style.right = textAreaRef.current.offsetWidth - left;
-    else
-        style.left = left;
-    return (React.createElement("ul", { className: ClassNames_1.classNames("mde-suggestions", classes), style: style }, suggestions.map(function (s, i) { return (React.createElement("li", { onClick: handleSuggestionClick, onMouseDown: handleMouseDown, key: i, "aria-selected": focusIndex === i ? "true" : "false", "data-index": "" + i }, s.preview)); })));
-};
-exports.SuggestionsDropdown = SuggestionsDropdown;
-
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ToolbarButton = void 0;
-var React = __webpack_require__(2);
-var defaultButtonProps = {
-    tabIndex: -1
-};
-var ToolbarButton = function (props) {
-    var buttonComponentClass = props.buttonComponentClass, buttonContent = props.buttonContent, buttonProps = props.buttonProps, onClick = props.onClick, readOnly = props.readOnly, name = props.name;
-    var finalButtonProps = __assign(__assign({}, defaultButtonProps), (buttonProps || {}));
-    var finalButtonComponent = buttonComponentClass || "button";
-    return (React.createElement("li", { className: "mde-header-item" }, React.createElement(finalButtonComponent, __assign(__assign({ "data-name": name }, finalButtonProps), {
-        onClick: onClick,
-        disabled: readOnly,
-        type: "button"
-    }), buttonContent)));
-};
-exports.ToolbarButton = ToolbarButton;
-
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ToolbarButtonGroup = void 0;
-var React = __webpack_require__(2);
-var ClassNames_1 = __webpack_require__(17);
-var ToolbarButtonGroup = function (props) {
-    return (React.createElement("ul", { className: ClassNames_1.classNames("mde-header-group", { hidden: props.hidden }) }, props.children));
-};
-exports.ToolbarButtonGroup = ToolbarButtonGroup;
-
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(__webpack_require__(24), exports);
-__exportStar(__webpack_require__(23), exports);
-__exportStar(__webpack_require__(26), exports);
-__exportStar(__webpack_require__(53), exports);
-__exportStar(__webpack_require__(55), exports);
-__exportStar(__webpack_require__(56), exports);
-__exportStar(__webpack_require__(54), exports);
-__exportStar(__webpack_require__(22), exports);
-
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.MdeFontAwesomeIcon = void 0;
-var React = __webpack_require__(2);
-var MdeFontAwesomeIcon = function (_a) {
-    var icon = _a.icon;
-    var transformedIcon = icon;
-    switch (icon) {
-        case "header":
-            transformedIcon = "heading";
-            break;
-        case "quote":
-            transformedIcon = "quote-right";
-            break;
-        case "unordered-list":
-            transformedIcon = "tasks";
-            break;
-        case "ordered-list":
-            transformedIcon = "list-ol";
-            break;
-        case "checked-list":
-            transformedIcon = "tasks";
-            break;
-        default:
-            transformedIcon = icon;
-    }
-    return React.createElement("i", { className: "fas fa-" + transformedIcon, "aria-hidden": "true" });
-};
-exports.MdeFontAwesomeIcon = MdeFontAwesomeIcon;
-
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(__webpack_require__(26), exports);
-__exportStar(__webpack_require__(57), exports);
-
-
-/***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDefaultToolbarCommands = exports.getDefaultCommandMap = exports.MdeFontAwesomeIcon = exports.SvgIcon = exports.MarkdownUtil = exports.ToolbarButtonGroup = exports.Toolbar = exports.Preview = exports.SuggestionsDropdown = exports.TextArea = void 0;
-var MarkdownUtil = __webpack_require__(16);
-exports.MarkdownUtil = MarkdownUtil;
-var components_1 = __webpack_require__(25);
-Object.defineProperty(exports, "TextArea", { enumerable: true, get: function () { return components_1.TextArea; } });
-Object.defineProperty(exports, "SuggestionsDropdown", { enumerable: true, get: function () { return components_1.SuggestionsDropdown; } });
-Object.defineProperty(exports, "Preview", { enumerable: true, get: function () { return components_1.Preview; } });
-Object.defineProperty(exports, "Toolbar", { enumerable: true, get: function () { return components_1.Toolbar; } });
-Object.defineProperty(exports, "ToolbarButtonGroup", { enumerable: true, get: function () { return components_1.ToolbarButtonGroup; } });
-var icons_1 = __webpack_require__(27);
-Object.defineProperty(exports, "SvgIcon", { enumerable: true, get: function () { return icons_1.SvgIcon; } });
-Object.defineProperty(exports, "MdeFontAwesomeIcon", { enumerable: true, get: function () { return icons_1.MdeFontAwesomeIcon; } });
-var defaults_1 = __webpack_require__(19);
-Object.defineProperty(exports, "getDefaultCommandMap", { enumerable: true, get: function () { return defaults_1.getDefaultCommandMap; } });
-Object.defineProperty(exports, "getDefaultToolbarCommands", { enumerable: true, get: function () { return defaults_1.getDefaultToolbarCommands; } });
-exports.default = components_1.ReactMde;
-
-
-/***/ }),
-/* 29 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-/*!
- * The MIT License
-   Copyright (c) 2018 Dmitriy Kubyshkin
-   Copied from https://github.com/grassator/insert-text-at-cursor
- */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.insertText = void 0;
-/**
- * Inserts the given text at the cursor. If the element contains a selection, the selection
- * will be replaced by the text.
- */
-function insertText(input, text) {
-    // Most of the used APIs only work with the field selected
-    input.focus();
-    // IE 8-10
-    if (document.selection) {
-        var ieRange = document.selection.createRange();
-        ieRange.text = text;
-        // Move cursor after the inserted text
-        ieRange.collapse(false /* to the end */);
-        ieRange.select();
-        return;
-    }
-    // Webkit + Edge
-    var isSuccess = document.execCommand("insertText", false, text);
-    if (!isSuccess) {
-        var start = input.selectionStart;
-        var end = input.selectionEnd;
-        // Firefox (non-standard method)
-        if (typeof input.setRangeText === "function") {
-            input.setRangeText(text);
-        }
-        else {
-            if (canManipulateViaTextNodes(input)) {
-                var textNode = document.createTextNode(text);
-                var node = input.firstChild;
-                // If textarea is empty, just insert the text
-                if (!node) {
-                    input.appendChild(textNode);
-                }
-                else {
-                    // Otherwise we need to find a nodes for start and end
-                    var offset = 0;
-                    var startNode = null;
-                    var endNode = null;
-                    // To make a change we just need a Range, not a Selection
-                    var range = document.createRange();
-                    while (node && (startNode === null || endNode === null)) {
-                        var nodeLength = node.nodeValue.length;
-                        // if start of the selection falls into current node
-                        if (start >= offset && start <= offset + nodeLength) {
-                            range.setStart((startNode = node), start - offset);
-                        }
-                        // if end of the selection falls into current node
-                        if (end >= offset && end <= offset + nodeLength) {
-                            range.setEnd((endNode = node), end - offset);
-                        }
-                        offset += nodeLength;
-                        node = node.nextSibling;
-                    }
-                    // If there is some text selected, remove it as we should replace it
-                    if (start !== end) {
-                        range.deleteContents();
-                    }
-                    // Finally insert a new node. The browser will automatically
-                    // split start and end nodes into two if necessary
-                    range.insertNode(textNode);
-                }
-            }
-            else {
-                // For the text input the only way is to replace the whole value :(
-                var value = input.value;
-                input.value = value.slice(0, start) + text + value.slice(end);
-            }
-        }
-        // Correct the cursor position to be at the end of the insertion
-        input.setSelectionRange(start + text.length, start + text.length);
-        // Notify any possible listeners of the change
-        var e = document.createEvent("UIEvent");
-        e.initEvent("input", true, false);
-        input.dispatchEvent(e);
-    }
-}
-exports.insertText = insertText;
-function canManipulateViaTextNodes(input) {
-    if (input.nodeName !== "TEXTAREA") {
-        return false;
-    }
-    var browserSupportsTextareaTextNodes;
-    if (typeof browserSupportsTextareaTextNodes === "undefined") {
-        var textarea = document.createElement("textarea");
-        textarea.value = "1";
-        browserSupportsTextareaTextNodes = !!textarea.firstChild;
-    }
-    return browserSupportsTextareaTextNodes;
-}
-
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-exports.default = Editor;
-
-var _react = __webpack_require__(2);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactMde = __webpack_require__(28);
-
-var _reactMde2 = _interopRequireDefault(_reactMde);
-
-var _showdown = __webpack_require__(63);
-
-var _showdown2 = _interopRequireDefault(_showdown);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function Editor(_ref) {
-    var currentNote = _ref.currentNote,
-        updateNote = _ref.updateNote;
-
-    var _React$useState = _react2.default.useState("write"),
-        _React$useState2 = _slicedToArray(_React$useState, 2),
-        selectedTab = _React$useState2[0],
-        setSelectedTab = _React$useState2[1];
-
-    var converter = new _showdown2.default.Converter({
-        tables: true,
-        simplifiedAutoLink: true,
-        strikethrough: true,
-        tasklists: true
-    });
-
-    return _react2.default.createElement(
-        "section",
-        { className: "pane editor" },
-        _react2.default.createElement(_reactMde2.default, {
-            value: currentNote.body,
-            onChange: updateNote,
-            selectedTab: selectedTab,
-            onTabChange: setSelectedTab,
-            generateMarkdownPreview: function generateMarkdownPreview(markdown) {
-                return Promise.resolve(converter.makeHtml(markdown));
-            },
-            minEditorHeight: 80,
-            heightUnits: "vh"
-        })
-    );
-}
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = Sidebar;
-
-var _react = __webpack_require__(2);
-
-var _react2 = _interopRequireDefault(_react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function Sidebar(props) {
-    var noteElements = props.notes.map(function (note, index) {
-        return _react2.default.createElement(
-            "div",
-            { key: note.id },
-            _react2.default.createElement(
-                "div",
-                {
-
-                    className: "title " + (note.id === props.currentNote.id ? "selected-note" : ""),
-                    onClick: function onClick() {
-                        return props.setCurrentNoteId(note.id);
-                    }
-                },
-                _react2.default.createElement(
-                    "h4",
-                    { className: "text-snippet" },
-                    "Note ",
-                    index + 1
-                )
-            )
-        );
-    });
-
-    return _react2.default.createElement(
-        "section",
-        { className: "pane sidebar" },
-        _react2.default.createElement(
-            "div",
-            { className: "sidebar--header" },
-            _react2.default.createElement(
-                "h3",
-                null,
-                "Notes"
-            ),
-            _react2.default.createElement(
-                "button",
-                { className: "new-note", onClick: props.newNote },
-                "+"
-            )
-        ),
-        noteElements
-    );
-}
-
-/***/ }),
-/* 32 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-var data = exports.data = [{
-    id: 1,
-    body: "### This just in!\n\nMarkdown is an *awesome* way to write **very basic HTML** by typing manually\n\nIt can be used for:\n\n1. README files\n1. Slack and Discord messages\n1. **So much more!**\n\n---\n\nHere's a division \uD83D\uDC46"
-}, { id: 2, body: "a" }, { id: 3, body: "b" }, { id: 4, body: "c" }, { id: 5, body: "d" }, { id: 6, body: "e" }];
-
-/***/ }),
-/* 33 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* WEBPACK VAR INJECTION */(function(process) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "nanoid", function() { return nanoid; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "customAlphabet", function() { return customAlphabet; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "customRandom", function() { return customRandom; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "random", function() { return random; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__url_alphabet_index_js__ = __webpack_require__(34);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "urlAlphabet", function() { return __WEBPACK_IMPORTED_MODULE_0__url_alphabet_index_js__["a"]; });
-// This file replaces `index.js` in bundlers like webpack or Rollup,
-// according to `browser` config in `package.json`.
-
-
-
-if (process.env.NODE_ENV !== 'production') {
-  // All bundlers will remove this block in the production bundle.
-  if (
-    typeof navigator !== 'undefined' &&
-    navigator.product === 'ReactNative' &&
-    typeof crypto === 'undefined'
-  ) {
-    throw new Error(
-      'React Native does not have a built-in secure random generator. ' +
-        'If you don’t need unpredictable IDs use `nanoid/non-secure`. ' +
-        'For secure IDs, import `react-native-get-random-values` ' +
-        'before Nano ID.'
-    )
-  }
-  if (typeof msCrypto !== 'undefined' && typeof crypto === 'undefined') {
-    throw new Error(
-      'Import file with `if (!window.crypto) window.crypto = window.msCrypto`' +
-        ' before importing Nano ID to fix IE 11 support'
-    )
-  }
-  if (typeof crypto === 'undefined') {
-    throw new Error(
-      'Your browser does not have secure random generator. ' +
-        'If you don’t need unpredictable IDs, you can use nanoid/non-secure.'
-    )
-  }
-}
-
-let random = bytes => crypto.getRandomValues(new Uint8Array(bytes))
-
-let customRandom = (alphabet, size, getRandom) => {
-  // First, a bitmask is necessary to generate the ID. The bitmask makes bytes
-  // values closer to the alphabet size. The bitmask calculates the closest
-  // `2^31 - 1` number, which exceeds the alphabet size.
-  // For example, the bitmask for the alphabet size 30 is 31 (00011111).
-  // `Math.clz32` is not used, because it is not available in browsers.
-  let mask = (2 << (Math.log(alphabet.length - 1) / Math.LN2)) - 1
-  // Though, the bitmask solution is not perfect since the bytes exceeding
-  // the alphabet size are refused. Therefore, to reliably generate the ID,
-  // the random bytes redundancy has to be satisfied.
-
-  // Note: every hardware random generator call is performance expensive,
-  // because the system call for entropy collection takes a lot of time.
-  // So, to avoid additional system calls, extra bytes are requested in advance.
-
-  // Next, a step determines how many random bytes to generate.
-  // The number of random bytes gets decided upon the ID size, mask,
-  // alphabet size, and magic number 1.6 (using 1.6 peaks at performance
-  // according to benchmarks).
-
-  // `-~f => Math.ceil(f)` if f is a float
-  // `-~i => i + 1` if i is an integer
-  let step = -~((1.6 * mask * size) / alphabet.length)
-
-  return () => {
-    let id = ''
-    while (true) {
-      let bytes = getRandom(step)
-      // A compact alternative for `for (var i = 0; i < step; i++)`.
-      let j = step
-      while (j--) {
-        // Adding `|| ''` refuses a random byte that exceeds the alphabet size.
-        id += alphabet[bytes[j] & mask] || ''
-        if (id.length === size) return id
-      }
-    }
-  }
-}
-
-let customAlphabet = (alphabet, size) => customRandom(alphabet, size, random)
-
-let nanoid = (size = 21) => {
-  let id = ''
-  let bytes = crypto.getRandomValues(new Uint8Array(size))
-
-  // A compact alternative for `for (var i = 0; i < step; i++)`.
-  while (size--) {
-    // It is incorrect to use bytes exceeding the alphabet size.
-    // The following mask reduces the random byte in the 0-255 value
-    // range to the 0-63 value range. Therefore, adding hacks, such
-    // as empty string fallback or magic numbers, is unneccessary because
-    // the bitmask trims bytes down to the alphabet size.
-    let byte = bytes[size] & 63
-    if (byte < 36) {
-      // `0-9a-z`
-      id += byte.toString(36)
-    } else if (byte < 62) {
-      // `A-Z`
-      id += (byte - 26).toString(36).toUpperCase()
-    } else if (byte < 63) {
-      id += '_'
-    } else {
-      id += '-'
-    }
-  }
-  return id
-}
-
-
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
-
-/***/ }),
-/* 34 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return urlAlphabet; });
-// This alphabet uses `A-Za-z0-9_-` symbols. The genetic algorithm helped
-// optimize the gzip compression for this alphabet.
-let urlAlphabet =
-  'ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW'
-
-
-
-
-/***/ }),
-/* 35 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(process) {/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-var printWarning = function() {};
-
-if (process.env.NODE_ENV !== 'production') {
-  var ReactPropTypesSecret = __webpack_require__(18);
-  var loggedTypeFailures = {};
-  var has = __webpack_require__(20);
-
-  printWarning = function(text) {
-    var message = 'Warning: ' + text;
-    if (typeof console !== 'undefined') {
-      console.error(message);
-    }
-    try {
-      // --- Welcome to debugging React ---
-      // This error was thrown as a convenience so that you can use this stack
-      // to find the callsite that caused this warning to fire.
-      throw new Error(message);
-    } catch (x) { /**/ }
-  };
-}
-
-/**
- * Assert that the values match with the type specs.
- * Error messages are memorized and will only be shown once.
- *
- * @param {object} typeSpecs Map of name to a ReactPropType
- * @param {object} values Runtime values that need to be type-checked
- * @param {string} location e.g. "prop", "context", "child context"
- * @param {string} componentName Name of the component for error messages.
- * @param {?Function} getStack Returns the component stack.
- * @private
- */
-function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
-  if (process.env.NODE_ENV !== 'production') {
-    for (var typeSpecName in typeSpecs) {
-      if (has(typeSpecs, typeSpecName)) {
-        var error;
-        // Prop type validation may throw. In case they do, we don't want to
-        // fail the render phase where it didn't fail before. So we log it.
-        // After these have been cleaned up, we'll let them throw.
-        try {
-          // This is intentionally an invariant that gets caught. It's the same
-          // behavior as without this statement except with a better message.
-          if (typeof typeSpecs[typeSpecName] !== 'function') {
-            var err = Error(
-              (componentName || 'React class') + ': ' + location + ' type `' + typeSpecName + '` is invalid; ' +
-              'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.' +
-              'This often happens because of typos such as `PropTypes.function` instead of `PropTypes.func`.'
-            );
-            err.name = 'Invariant Violation';
-            throw err;
-          }
-          error = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, ReactPropTypesSecret);
-        } catch (ex) {
-          error = ex;
-        }
-        if (error && !(error instanceof Error)) {
-          printWarning(
-            (componentName || 'React class') + ': type specification of ' +
-            location + ' `' + typeSpecName + '` is invalid; the type checker ' +
-            'function must return `null` or an `Error` but returned a ' + typeof error + '. ' +
-            'You may have forgotten to pass an argument to the type checker ' +
-            'creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and ' +
-            'shape all require an argument).'
-          );
-        }
-        if (error instanceof Error && !(error.message in loggedTypeFailures)) {
-          // Only monitor this failure once because there tends to be a lot of the
-          // same error.
-          loggedTypeFailures[error.message] = true;
-
-          var stack = getStack ? getStack() : '';
-
-          printWarning(
-            'Failed ' + location + ' type: ' + error.message + (stack != null ? stack : '')
-          );
-        }
-      }
-    }
-  }
-}
-
-/**
- * Resets warning cache when testing.
- *
- * @private
- */
-checkPropTypes.resetWarningCache = function() {
-  if (process.env.NODE_ENV !== 'production') {
-    loggedTypeFailures = {};
-  }
-}
-
-module.exports = checkPropTypes;
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 36 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-var ReactPropTypesSecret = __webpack_require__(18);
-
-function emptyFunction() {}
-function emptyFunctionWithReset() {}
-emptyFunctionWithReset.resetWarningCache = emptyFunction;
-
-module.exports = function() {
-  function shim(props, propName, componentName, location, propFullName, secret) {
-    if (secret === ReactPropTypesSecret) {
-      // It is still safe when called from React.
-      return;
-    }
-    var err = new Error(
-      'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
-      'Use PropTypes.checkPropTypes() to call them. ' +
-      'Read more at http://fb.me/use-check-prop-types'
-    );
-    err.name = 'Invariant Violation';
-    throw err;
-  };
-  shim.isRequired = shim;
-  function getShim() {
-    return shim;
-  };
-  // Important!
-  // Keep this list in sync with production version in `./factoryWithTypeCheckers.js`.
-  var ReactPropTypes = {
-    array: shim,
-    bigint: shim,
-    bool: shim,
-    func: shim,
-    number: shim,
-    object: shim,
-    string: shim,
-    symbol: shim,
-
-    any: shim,
-    arrayOf: getShim,
-    element: shim,
-    elementType: shim,
-    instanceOf: getShim,
-    node: shim,
-    objectOf: getShim,
-    oneOf: getShim,
-    oneOfType: getShim,
-    shape: getShim,
-    exact: getShim,
-
-    checkPropTypes: emptyFunctionWithReset,
-    resetWarningCache: emptyFunction
-  };
-
-  ReactPropTypes.PropTypes = ReactPropTypes;
-
-  return ReactPropTypes;
-};
-
-
-/***/ }),
-/* 37 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(process) {/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-var ReactIs = __webpack_require__(21);
-var assign = __webpack_require__(1);
-
-var ReactPropTypesSecret = __webpack_require__(18);
-var has = __webpack_require__(20);
-var checkPropTypes = __webpack_require__(35);
-
-var printWarning = function() {};
-
-if (process.env.NODE_ENV !== 'production') {
-  printWarning = function(text) {
-    var message = 'Warning: ' + text;
-    if (typeof console !== 'undefined') {
-      console.error(message);
-    }
-    try {
-      // --- Welcome to debugging React ---
-      // This error was thrown as a convenience so that you can use this stack
-      // to find the callsite that caused this warning to fire.
-      throw new Error(message);
-    } catch (x) {}
-  };
-}
-
-function emptyFunctionThatReturnsNull() {
-  return null;
-}
-
-module.exports = function(isValidElement, throwOnDirectAccess) {
-  /* global Symbol */
-  var ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
-  var FAUX_ITERATOR_SYMBOL = '@@iterator'; // Before Symbol spec.
-
-  /**
-   * Returns the iterator method function contained on the iterable object.
-   *
-   * Be sure to invoke the function with the iterable as context:
-   *
-   *     var iteratorFn = getIteratorFn(myIterable);
-   *     if (iteratorFn) {
-   *       var iterator = iteratorFn.call(myIterable);
-   *       ...
-   *     }
-   *
-   * @param {?object} maybeIterable
-   * @return {?function}
-   */
-  function getIteratorFn(maybeIterable) {
-    var iteratorFn = maybeIterable && (ITERATOR_SYMBOL && maybeIterable[ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL]);
-    if (typeof iteratorFn === 'function') {
-      return iteratorFn;
-    }
-  }
-
-  /**
-   * Collection of methods that allow declaration and validation of props that are
-   * supplied to React components. Example usage:
-   *
-   *   var Props = require('ReactPropTypes');
-   *   var MyArticle = React.createClass({
-   *     propTypes: {
-   *       // An optional string prop named "description".
-   *       description: Props.string,
-   *
-   *       // A required enum prop named "category".
-   *       category: Props.oneOf(['News','Photos']).isRequired,
-   *
-   *       // A prop named "dialog" that requires an instance of Dialog.
-   *       dialog: Props.instanceOf(Dialog).isRequired
-   *     },
-   *     render: function() { ... }
-   *   });
-   *
-   * A more formal specification of how these methods are used:
-   *
-   *   type := array|bool|func|object|number|string|oneOf([...])|instanceOf(...)
-   *   decl := ReactPropTypes.{type}(.isRequired)?
-   *
-   * Each and every declaration produces a function with the same signature. This
-   * allows the creation of custom validation functions. For example:
-   *
-   *  var MyLink = React.createClass({
-   *    propTypes: {
-   *      // An optional string or URI prop named "href".
-   *      href: function(props, propName, componentName) {
-   *        var propValue = props[propName];
-   *        if (propValue != null && typeof propValue !== 'string' &&
-   *            !(propValue instanceof URI)) {
-   *          return new Error(
-   *            'Expected a string or an URI for ' + propName + ' in ' +
-   *            componentName
-   *          );
-   *        }
-   *      }
-   *    },
-   *    render: function() {...}
-   *  });
-   *
-   * @internal
-   */
-
-  var ANONYMOUS = '<<anonymous>>';
-
-  // Important!
-  // Keep this list in sync with production version in `./factoryWithThrowingShims.js`.
-  var ReactPropTypes = {
-    array: createPrimitiveTypeChecker('array'),
-    bigint: createPrimitiveTypeChecker('bigint'),
-    bool: createPrimitiveTypeChecker('boolean'),
-    func: createPrimitiveTypeChecker('function'),
-    number: createPrimitiveTypeChecker('number'),
-    object: createPrimitiveTypeChecker('object'),
-    string: createPrimitiveTypeChecker('string'),
-    symbol: createPrimitiveTypeChecker('symbol'),
-
-    any: createAnyTypeChecker(),
-    arrayOf: createArrayOfTypeChecker,
-    element: createElementTypeChecker(),
-    elementType: createElementTypeTypeChecker(),
-    instanceOf: createInstanceTypeChecker,
-    node: createNodeChecker(),
-    objectOf: createObjectOfTypeChecker,
-    oneOf: createEnumTypeChecker,
-    oneOfType: createUnionTypeChecker,
-    shape: createShapeTypeChecker,
-    exact: createStrictShapeTypeChecker,
-  };
-
-  /**
-   * inlined Object.is polyfill to avoid requiring consumers ship their own
-   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
-   */
-  /*eslint-disable no-self-compare*/
-  function is(x, y) {
-    // SameValue algorithm
-    if (x === y) {
-      // Steps 1-5, 7-10
-      // Steps 6.b-6.e: +0 != -0
-      return x !== 0 || 1 / x === 1 / y;
-    } else {
-      // Step 6.a: NaN == NaN
-      return x !== x && y !== y;
-    }
-  }
-  /*eslint-enable no-self-compare*/
-
-  /**
-   * We use an Error-like object for backward compatibility as people may call
-   * PropTypes directly and inspect their output. However, we don't use real
-   * Errors anymore. We don't inspect their stack anyway, and creating them
-   * is prohibitively expensive if they are created too often, such as what
-   * happens in oneOfType() for any type before the one that matched.
-   */
-  function PropTypeError(message, data) {
-    this.message = message;
-    this.data = data && typeof data === 'object' ? data: {};
-    this.stack = '';
-  }
-  // Make `instanceof Error` still work for returned errors.
-  PropTypeError.prototype = Error.prototype;
-
-  function createChainableTypeChecker(validate) {
-    if (process.env.NODE_ENV !== 'production') {
-      var manualPropTypeCallCache = {};
-      var manualPropTypeWarningCount = 0;
-    }
-    function checkType(isRequired, props, propName, componentName, location, propFullName, secret) {
-      componentName = componentName || ANONYMOUS;
-      propFullName = propFullName || propName;
-
-      if (secret !== ReactPropTypesSecret) {
-        if (throwOnDirectAccess) {
-          // New behavior only for users of `prop-types` package
-          var err = new Error(
-            'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
-            'Use `PropTypes.checkPropTypes()` to call them. ' +
-            'Read more at http://fb.me/use-check-prop-types'
-          );
-          err.name = 'Invariant Violation';
-          throw err;
-        } else if (process.env.NODE_ENV !== 'production' && typeof console !== 'undefined') {
-          // Old behavior for people using React.PropTypes
-          var cacheKey = componentName + ':' + propName;
-          if (
-            !manualPropTypeCallCache[cacheKey] &&
-            // Avoid spamming the console because they are often not actionable except for lib authors
-            manualPropTypeWarningCount < 3
-          ) {
-            printWarning(
-              'You are manually calling a React.PropTypes validation ' +
-              'function for the `' + propFullName + '` prop on `' + componentName + '`. This is deprecated ' +
-              'and will throw in the standalone `prop-types` package. ' +
-              'You may be seeing this warning due to a third-party PropTypes ' +
-              'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.'
-            );
-            manualPropTypeCallCache[cacheKey] = true;
-            manualPropTypeWarningCount++;
-          }
-        }
-      }
-      if (props[propName] == null) {
-        if (isRequired) {
-          if (props[propName] === null) {
-            return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required ' + ('in `' + componentName + '`, but its value is `null`.'));
-          }
-          return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required in ' + ('`' + componentName + '`, but its value is `undefined`.'));
-        }
-        return null;
-      } else {
-        return validate(props, propName, componentName, location, propFullName);
-      }
-    }
-
-    var chainedCheckType = checkType.bind(null, false);
-    chainedCheckType.isRequired = checkType.bind(null, true);
-
-    return chainedCheckType;
-  }
-
-  function createPrimitiveTypeChecker(expectedType) {
-    function validate(props, propName, componentName, location, propFullName, secret) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== expectedType) {
-        // `propValue` being instance of, say, date/regexp, pass the 'object'
-        // check, but we can offer a more precise error message here rather than
-        // 'of type `object`'.
-        var preciseType = getPreciseType(propValue);
-
-        return new PropTypeError(
-          'Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'),
-          {expectedType: expectedType}
-        );
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createAnyTypeChecker() {
-    return createChainableTypeChecker(emptyFunctionThatReturnsNull);
-  }
-
-  function createArrayOfTypeChecker(typeChecker) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (typeof typeChecker !== 'function') {
-        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside arrayOf.');
-      }
-      var propValue = props[propName];
-      if (!Array.isArray(propValue)) {
-        var propType = getPropType(propValue);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an array.'));
-      }
-      for (var i = 0; i < propValue.length; i++) {
-        var error = typeChecker(propValue, i, componentName, location, propFullName + '[' + i + ']', ReactPropTypesSecret);
-        if (error instanceof Error) {
-          return error;
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createElementTypeChecker() {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      if (!isValidElement(propValue)) {
-        var propType = getPropType(propValue);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createElementTypeTypeChecker() {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      if (!ReactIs.isValidElementType(propValue)) {
-        var propType = getPropType(propValue);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement type.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createInstanceTypeChecker(expectedClass) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (!(props[propName] instanceof expectedClass)) {
-        var expectedClassName = expectedClass.name || ANONYMOUS;
-        var actualClassName = getClassName(props[propName]);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + actualClassName + '` supplied to `' + componentName + '`, expected ') + ('instance of `' + expectedClassName + '`.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createEnumTypeChecker(expectedValues) {
-    if (!Array.isArray(expectedValues)) {
-      if (process.env.NODE_ENV !== 'production') {
-        if (arguments.length > 1) {
-          printWarning(
-            'Invalid arguments supplied to oneOf, expected an array, got ' + arguments.length + ' arguments. ' +
-            'A common mistake is to write oneOf(x, y, z) instead of oneOf([x, y, z]).'
-          );
-        } else {
-          printWarning('Invalid argument supplied to oneOf, expected an array.');
-        }
-      }
-      return emptyFunctionThatReturnsNull;
-    }
-
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      for (var i = 0; i < expectedValues.length; i++) {
-        if (is(propValue, expectedValues[i])) {
-          return null;
-        }
-      }
-
-      var valuesString = JSON.stringify(expectedValues, function replacer(key, value) {
-        var type = getPreciseType(value);
-        if (type === 'symbol') {
-          return String(value);
-        }
-        return value;
-      });
-      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of value `' + String(propValue) + '` ' + ('supplied to `' + componentName + '`, expected one of ' + valuesString + '.'));
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createObjectOfTypeChecker(typeChecker) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (typeof typeChecker !== 'function') {
-        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside objectOf.');
-      }
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an object.'));
-      }
-      for (var key in propValue) {
-        if (has(propValue, key)) {
-          var error = typeChecker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-          if (error instanceof Error) {
-            return error;
-          }
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createUnionTypeChecker(arrayOfTypeCheckers) {
-    if (!Array.isArray(arrayOfTypeCheckers)) {
-      process.env.NODE_ENV !== 'production' ? printWarning('Invalid argument supplied to oneOfType, expected an instance of array.') : void 0;
-      return emptyFunctionThatReturnsNull;
-    }
-
-    for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
-      var checker = arrayOfTypeCheckers[i];
-      if (typeof checker !== 'function') {
-        printWarning(
-          'Invalid argument supplied to oneOfType. Expected an array of check functions, but ' +
-          'received ' + getPostfixForTypeWarning(checker) + ' at index ' + i + '.'
-        );
-        return emptyFunctionThatReturnsNull;
-      }
-    }
-
-    function validate(props, propName, componentName, location, propFullName) {
-      var expectedTypes = [];
-      for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
-        var checker = arrayOfTypeCheckers[i];
-        var checkerResult = checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret);
-        if (checkerResult == null) {
-          return null;
-        }
-        if (checkerResult.data && has(checkerResult.data, 'expectedType')) {
-          expectedTypes.push(checkerResult.data.expectedType);
-        }
-      }
-      var expectedTypesMessage = (expectedTypes.length > 0) ? ', expected one of type [' + expectedTypes.join(', ') + ']': '';
-      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`' + expectedTypesMessage + '.'));
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createNodeChecker() {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (!isNode(props[propName])) {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`, expected a ReactNode.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function invalidValidatorError(componentName, location, propFullName, key, type) {
-    return new PropTypeError(
-      (componentName || 'React class') + ': ' + location + ' type `' + propFullName + '.' + key + '` is invalid; ' +
-      'it must be a function, usually from the `prop-types` package, but received `' + type + '`.'
-    );
-  }
-
-  function createShapeTypeChecker(shapeTypes) {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
-      }
-      for (var key in shapeTypes) {
-        var checker = shapeTypes[key];
-        if (typeof checker !== 'function') {
-          return invalidValidatorError(componentName, location, propFullName, key, getPreciseType(checker));
-        }
-        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-        if (error) {
-          return error;
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createStrictShapeTypeChecker(shapeTypes) {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
-      }
-      // We need to check all keys in case some are required but missing from props.
-      var allKeys = assign({}, props[propName], shapeTypes);
-      for (var key in allKeys) {
-        var checker = shapeTypes[key];
-        if (has(shapeTypes, key) && typeof checker !== 'function') {
-          return invalidValidatorError(componentName, location, propFullName, key, getPreciseType(checker));
-        }
-        if (!checker) {
-          return new PropTypeError(
-            'Invalid ' + location + ' `' + propFullName + '` key `' + key + '` supplied to `' + componentName + '`.' +
-            '\nBad object: ' + JSON.stringify(props[propName], null, '  ') +
-            '\nValid keys: ' + JSON.stringify(Object.keys(shapeTypes), null, '  ')
-          );
-        }
-        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-        if (error) {
-          return error;
-        }
-      }
-      return null;
-    }
-
-    return createChainableTypeChecker(validate);
-  }
-
-  function isNode(propValue) {
-    switch (typeof propValue) {
-      case 'number':
-      case 'string':
-      case 'undefined':
-        return true;
-      case 'boolean':
-        return !propValue;
-      case 'object':
-        if (Array.isArray(propValue)) {
-          return propValue.every(isNode);
-        }
-        if (propValue === null || isValidElement(propValue)) {
-          return true;
-        }
-
-        var iteratorFn = getIteratorFn(propValue);
-        if (iteratorFn) {
-          var iterator = iteratorFn.call(propValue);
-          var step;
-          if (iteratorFn !== propValue.entries) {
-            while (!(step = iterator.next()).done) {
-              if (!isNode(step.value)) {
-                return false;
-              }
-            }
-          } else {
-            // Iterator will provide entry [k,v] tuples rather than values.
-            while (!(step = iterator.next()).done) {
-              var entry = step.value;
-              if (entry) {
-                if (!isNode(entry[1])) {
-                  return false;
-                }
-              }
-            }
-          }
-        } else {
-          return false;
-        }
-
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  function isSymbol(propType, propValue) {
-    // Native Symbol.
-    if (propType === 'symbol') {
-      return true;
-    }
-
-    // falsy value can't be a Symbol
-    if (!propValue) {
-      return false;
-    }
-
-    // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
-    if (propValue['@@toStringTag'] === 'Symbol') {
-      return true;
-    }
-
-    // Fallback for non-spec compliant Symbols which are polyfilled.
-    if (typeof Symbol === 'function' && propValue instanceof Symbol) {
-      return true;
-    }
-
-    return false;
-  }
-
-  // Equivalent of `typeof` but with special handling for array and regexp.
-  function getPropType(propValue) {
-    var propType = typeof propValue;
-    if (Array.isArray(propValue)) {
-      return 'array';
-    }
-    if (propValue instanceof RegExp) {
-      // Old webkits (at least until Android 4.0) return 'function' rather than
-      // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
-      // passes PropTypes.object.
-      return 'object';
-    }
-    if (isSymbol(propType, propValue)) {
-      return 'symbol';
-    }
-    return propType;
-  }
-
-  // This handles more types than `getPropType`. Only used for error messages.
-  // See `createPrimitiveTypeChecker`.
-  function getPreciseType(propValue) {
-    if (typeof propValue === 'undefined' || propValue === null) {
-      return '' + propValue;
-    }
-    var propType = getPropType(propValue);
-    if (propType === 'object') {
-      if (propValue instanceof Date) {
-        return 'date';
-      } else if (propValue instanceof RegExp) {
-        return 'regexp';
-      }
-    }
-    return propType;
-  }
-
-  // Returns a string that is postfixed to a warning about an invalid type.
-  // For example, "undefined" or "of type array"
-  function getPostfixForTypeWarning(value) {
-    var type = getPreciseType(value);
-    switch (type) {
-      case 'array':
-      case 'object':
-        return 'an ' + type;
-      case 'boolean':
-      case 'date':
-      case 'regexp':
-        return 'a ' + type;
-      default:
-        return type;
-    }
-  }
-
-  // Returns class name of the object, if any.
-  function getClassName(propValue) {
-    if (!propValue.constructor || !propValue.constructor.name) {
-      return ANONYMOUS;
-    }
-    return propValue.constructor.name;
-  }
-
-  ReactPropTypes.checkPropTypes = checkPropTypes;
-  ReactPropTypes.resetWarningCache = checkPropTypes.resetWarningCache;
-  ReactPropTypes.PropTypes = ReactPropTypes;
-
-  return ReactPropTypes;
-};
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 38 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(process) {/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-if (process.env.NODE_ENV !== 'production') {
-  var ReactIs = __webpack_require__(21);
-
-  // By explicitly using `prop-types` you are opting into new development behavior.
-  // http://fb.me/prop-types-in-prod
-  var throwOnDirectAccess = true;
-  module.exports = __webpack_require__(37)(ReactIs.isElement, throwOnDirectAccess);
-} else {
-  // By explicitly using `prop-types` you are opting into new production behavior.
-  // http://fb.me/prop-types-in-prod
-  module.exports = __webpack_require__(36)();
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 39 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(process) {/** @license React v16.13.1
- * react-is.development.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-
-
-if (process.env.NODE_ENV !== "production") {
-  (function() {
-'use strict';
-
-// The Symbol used to tag the ReactElement-like types. If there is no native Symbol
-// nor polyfill, then a plain number is used for performance.
-var hasSymbol = typeof Symbol === 'function' && Symbol.for;
-var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;
-var REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca;
-var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for('react.fragment') : 0xeacb;
-var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for('react.strict_mode') : 0xeacc;
-var REACT_PROFILER_TYPE = hasSymbol ? Symbol.for('react.profiler') : 0xead2;
-var REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for('react.provider') : 0xeacd;
-var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace; // TODO: We don't use AsyncMode or ConcurrentMode anymore. They were temporary
-// (unstable) APIs that have been removed. Can we remove the symbols?
-
-var REACT_ASYNC_MODE_TYPE = hasSymbol ? Symbol.for('react.async_mode') : 0xeacf;
-var REACT_CONCURRENT_MODE_TYPE = hasSymbol ? Symbol.for('react.concurrent_mode') : 0xeacf;
-var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for('react.forward_ref') : 0xead0;
-var REACT_SUSPENSE_TYPE = hasSymbol ? Symbol.for('react.suspense') : 0xead1;
-var REACT_SUSPENSE_LIST_TYPE = hasSymbol ? Symbol.for('react.suspense_list') : 0xead8;
-var REACT_MEMO_TYPE = hasSymbol ? Symbol.for('react.memo') : 0xead3;
-var REACT_LAZY_TYPE = hasSymbol ? Symbol.for('react.lazy') : 0xead4;
-var REACT_BLOCK_TYPE = hasSymbol ? Symbol.for('react.block') : 0xead9;
-var REACT_FUNDAMENTAL_TYPE = hasSymbol ? Symbol.for('react.fundamental') : 0xead5;
-var REACT_RESPONDER_TYPE = hasSymbol ? Symbol.for('react.responder') : 0xead6;
-var REACT_SCOPE_TYPE = hasSymbol ? Symbol.for('react.scope') : 0xead7;
-
-function isValidElementType(type) {
-  return typeof type === 'string' || typeof type === 'function' || // Note: its typeof might be other than 'symbol' or 'number' if it's a polyfill.
-  type === REACT_FRAGMENT_TYPE || type === REACT_CONCURRENT_MODE_TYPE || type === REACT_PROFILER_TYPE || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || type === REACT_SUSPENSE_LIST_TYPE || typeof type === 'object' && type !== null && (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE || type.$$typeof === REACT_FUNDAMENTAL_TYPE || type.$$typeof === REACT_RESPONDER_TYPE || type.$$typeof === REACT_SCOPE_TYPE || type.$$typeof === REACT_BLOCK_TYPE);
-}
-
-function typeOf(object) {
-  if (typeof object === 'object' && object !== null) {
-    var $$typeof = object.$$typeof;
-
-    switch ($$typeof) {
-      case REACT_ELEMENT_TYPE:
-        var type = object.type;
-
-        switch (type) {
-          case REACT_ASYNC_MODE_TYPE:
-          case REACT_CONCURRENT_MODE_TYPE:
-          case REACT_FRAGMENT_TYPE:
-          case REACT_PROFILER_TYPE:
-          case REACT_STRICT_MODE_TYPE:
-          case REACT_SUSPENSE_TYPE:
-            return type;
-
-          default:
-            var $$typeofType = type && type.$$typeof;
-
-            switch ($$typeofType) {
-              case REACT_CONTEXT_TYPE:
-              case REACT_FORWARD_REF_TYPE:
-              case REACT_LAZY_TYPE:
-              case REACT_MEMO_TYPE:
-              case REACT_PROVIDER_TYPE:
-                return $$typeofType;
-
-              default:
-                return $$typeof;
-            }
-
-        }
-
-      case REACT_PORTAL_TYPE:
-        return $$typeof;
-    }
-  }
-
-  return undefined;
-} // AsyncMode is deprecated along with isAsyncMode
-
-var AsyncMode = REACT_ASYNC_MODE_TYPE;
-var ConcurrentMode = REACT_CONCURRENT_MODE_TYPE;
-var ContextConsumer = REACT_CONTEXT_TYPE;
-var ContextProvider = REACT_PROVIDER_TYPE;
-var Element = REACT_ELEMENT_TYPE;
-var ForwardRef = REACT_FORWARD_REF_TYPE;
-var Fragment = REACT_FRAGMENT_TYPE;
-var Lazy = REACT_LAZY_TYPE;
-var Memo = REACT_MEMO_TYPE;
-var Portal = REACT_PORTAL_TYPE;
-var Profiler = REACT_PROFILER_TYPE;
-var StrictMode = REACT_STRICT_MODE_TYPE;
-var Suspense = REACT_SUSPENSE_TYPE;
-var hasWarnedAboutDeprecatedIsAsyncMode = false; // AsyncMode should be deprecated
-
-function isAsyncMode(object) {
-  {
-    if (!hasWarnedAboutDeprecatedIsAsyncMode) {
-      hasWarnedAboutDeprecatedIsAsyncMode = true; // Using console['warn'] to evade Babel and ESLint
-
-      console['warn']('The ReactIs.isAsyncMode() alias has been deprecated, ' + 'and will be removed in React 17+. Update your code to use ' + 'ReactIs.isConcurrentMode() instead. It has the exact same API.');
-    }
-  }
-
-  return isConcurrentMode(object) || typeOf(object) === REACT_ASYNC_MODE_TYPE;
-}
-function isConcurrentMode(object) {
-  return typeOf(object) === REACT_CONCURRENT_MODE_TYPE;
-}
-function isContextConsumer(object) {
-  return typeOf(object) === REACT_CONTEXT_TYPE;
-}
-function isContextProvider(object) {
-  return typeOf(object) === REACT_PROVIDER_TYPE;
-}
-function isElement(object) {
-  return typeof object === 'object' && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
-}
-function isForwardRef(object) {
-  return typeOf(object) === REACT_FORWARD_REF_TYPE;
-}
-function isFragment(object) {
-  return typeOf(object) === REACT_FRAGMENT_TYPE;
-}
-function isLazy(object) {
-  return typeOf(object) === REACT_LAZY_TYPE;
-}
-function isMemo(object) {
-  return typeOf(object) === REACT_MEMO_TYPE;
-}
-function isPortal(object) {
-  return typeOf(object) === REACT_PORTAL_TYPE;
-}
-function isProfiler(object) {
-  return typeOf(object) === REACT_PROFILER_TYPE;
-}
-function isStrictMode(object) {
-  return typeOf(object) === REACT_STRICT_MODE_TYPE;
-}
-function isSuspense(object) {
-  return typeOf(object) === REACT_SUSPENSE_TYPE;
-}
-
-exports.AsyncMode = AsyncMode;
-exports.ConcurrentMode = ConcurrentMode;
-exports.ContextConsumer = ContextConsumer;
-exports.ContextProvider = ContextProvider;
-exports.Element = Element;
-exports.ForwardRef = ForwardRef;
-exports.Fragment = Fragment;
-exports.Lazy = Lazy;
-exports.Memo = Memo;
-exports.Portal = Portal;
-exports.Profiler = Profiler;
-exports.StrictMode = StrictMode;
-exports.Suspense = Suspense;
-exports.isAsyncMode = isAsyncMode;
-exports.isConcurrentMode = isConcurrentMode;
-exports.isContextConsumer = isContextConsumer;
-exports.isContextProvider = isContextProvider;
-exports.isElement = isElement;
-exports.isForwardRef = isForwardRef;
-exports.isFragment = isFragment;
-exports.isLazy = isLazy;
-exports.isMemo = isMemo;
-exports.isPortal = isPortal;
-exports.isProfiler = isProfiler;
-exports.isStrictMode = isStrictMode;
-exports.isSuspense = isSuspense;
-exports.isValidElementType = isValidElementType;
-exports.typeOf = typeOf;
-  })();
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 40 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/** @license React v16.13.1
- * react-is.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-var b="function"===typeof Symbol&&Symbol.for,c=b?Symbol.for("react.element"):60103,d=b?Symbol.for("react.portal"):60106,e=b?Symbol.for("react.fragment"):60107,f=b?Symbol.for("react.strict_mode"):60108,g=b?Symbol.for("react.profiler"):60114,h=b?Symbol.for("react.provider"):60109,k=b?Symbol.for("react.context"):60110,l=b?Symbol.for("react.async_mode"):60111,m=b?Symbol.for("react.concurrent_mode"):60111,n=b?Symbol.for("react.forward_ref"):60112,p=b?Symbol.for("react.suspense"):60113,q=b?
-Symbol.for("react.suspense_list"):60120,r=b?Symbol.for("react.memo"):60115,t=b?Symbol.for("react.lazy"):60116,v=b?Symbol.for("react.block"):60121,w=b?Symbol.for("react.fundamental"):60117,x=b?Symbol.for("react.responder"):60118,y=b?Symbol.for("react.scope"):60119;
-function z(a){if("object"===typeof a&&null!==a){var u=a.$$typeof;switch(u){case c:switch(a=a.type,a){case l:case m:case e:case g:case f:case p:return a;default:switch(a=a&&a.$$typeof,a){case k:case n:case t:case r:case h:return a;default:return u}}case d:return u}}}function A(a){return z(a)===m}exports.AsyncMode=l;exports.ConcurrentMode=m;exports.ContextConsumer=k;exports.ContextProvider=h;exports.Element=c;exports.ForwardRef=n;exports.Fragment=e;exports.Lazy=t;exports.Memo=r;exports.Portal=d;
-exports.Profiler=g;exports.StrictMode=f;exports.Suspense=p;exports.isAsyncMode=function(a){return A(a)||z(a)===l};exports.isConcurrentMode=A;exports.isContextConsumer=function(a){return z(a)===k};exports.isContextProvider=function(a){return z(a)===h};exports.isElement=function(a){return"object"===typeof a&&null!==a&&a.$$typeof===c};exports.isForwardRef=function(a){return z(a)===n};exports.isFragment=function(a){return z(a)===e};exports.isLazy=function(a){return z(a)===t};
-exports.isMemo=function(a){return z(a)===r};exports.isPortal=function(a){return z(a)===d};exports.isProfiler=function(a){return z(a)===g};exports.isStrictMode=function(a){return z(a)===f};exports.isSuspense=function(a){return z(a)===p};
-exports.isValidElementType=function(a){return"string"===typeof a||"function"===typeof a||a===e||a===m||a===g||a===f||a===p||a===q||"object"===typeof a&&null!==a&&(a.$$typeof===t||a.$$typeof===r||a.$$typeof===h||a.$$typeof===k||a.$$typeof===n||a.$$typeof===w||a.$$typeof===x||a.$$typeof===y||a.$$typeof===v)};exports.typeOf=z;
-
-
-/***/ }),
-/* 41 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CommandOrchestrator = exports.getStateFromTextArea = exports.TextAreaTextApi = void 0;
-var __1 = __webpack_require__(28);
-var InsertTextAtPosition_1 = __webpack_require__(29);
-var command_utils_1 = __webpack_require__(42);
-var defaults_1 = __webpack_require__(19);
-var TextAreaTextApi = /** @class */ (function () {
-    function TextAreaTextApi(textAreaRef) {
-        this.textAreaRef = textAreaRef;
-    }
-    TextAreaTextApi.prototype.replaceSelection = function (text) {
-        var textArea = this.textAreaRef.current;
-        InsertTextAtPosition_1.insertText(textArea, text);
-        return getStateFromTextArea(textArea);
-    };
-    TextAreaTextApi.prototype.setSelectionRange = function (selection) {
-        var textArea = this.textAreaRef.current;
-        textArea.focus();
-        textArea.selectionStart = selection.start;
-        textArea.selectionEnd = selection.end;
-        return getStateFromTextArea(textArea);
-    };
-    TextAreaTextApi.prototype.getState = function () {
-        var textArea = this.textAreaRef.current;
-        return getStateFromTextArea(textArea);
-    };
-    return TextAreaTextApi;
-}());
-exports.TextAreaTextApi = TextAreaTextApi;
-function getStateFromTextArea(textArea) {
-    return {
-        selection: {
-            start: textArea.selectionStart,
-            end: textArea.selectionEnd
-        },
-        text: textArea.value,
-        selectedText: textArea.value.slice(textArea.selectionStart, textArea.selectionEnd)
-    };
-}
-exports.getStateFromTextArea = getStateFromTextArea;
-var CommandOrchestrator = /** @class */ (function () {
-    function CommandOrchestrator(customCommands, textArea, l18n, pasteOptions) {
-        var _this = this;
-        this.getCommand = function (name) {
-            var command = _this.commandMap[name];
-            if (!command) {
-                throw new Error("Cannot execute command. Command not found: " + name);
-            }
-            return command;
-        };
-        /**
-         * Tries to find a command the wants to handle the keyboard event.
-         * If a command is found, it is executed and the function returns
-         */
-        this.handlePossibleKeyCommand = function (e) {
-            for (var _i = 0, _a = _this.keyActivatedCommands; _i < _a.length; _i++) {
-                var commandName = _a[_i];
-                if (_this.getCommand(commandName).handleKeyCommand(e)) {
-                    _this.executeCommand(commandName).then(function (r) { });
-                    return true;
-                }
-            }
-            return false;
-        };
-        if (pasteOptions && !pasteOptions.saveImage) {
-            throw new Error("paste options are incomplete. saveImage are required ");
-        }
-        this.commandMap = __assign(__assign({}, __1.getDefaultCommandMap()), (customCommands || {}));
-        this.pasteOptions = pasteOptions;
-        this.keyActivatedCommands = command_utils_1.extractKeyActivatedCommands(customCommands);
-        this.textAreaRef = textArea;
-        this.textApi = new TextAreaTextApi(textArea);
-        this.l18n = l18n;
-    }
-    CommandOrchestrator.prototype.executeCommand = function (commandName, context) {
-        return __awaiter(this, void 0, void 0, function () {
-            var command, result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (this.isExecuting) {
-                            // The simplest thing to do is to ignore commands while
-                            // there is already a command executing. The alternative would be to queue commands
-                            // but there is no guarantee that the state after one command executes will still be compatible
-                            // with the next one. In fact, it is likely not to be.
-                            return [2 /*return*/];
-                        }
-                        this.isExecuting = true;
-                        command = this.commandMap[commandName];
-                        result = command.execute({
-                            initialState: getStateFromTextArea(this.textAreaRef.current),
-                            textApi: this.textApi,
-                            l18n: this.l18n,
-                            context: context
-                        });
-                        return [4 /*yield*/, result];
-                    case 1:
-                        _a.sent();
-                        this.isExecuting = false;
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    /**
-     * Executes the paste command
-     */
-    CommandOrchestrator.prototype.executePasteCommand = function (event) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                if (this.pasteOptions) {
-                    return [2 /*return*/, this.executeCommand(this.pasteOptions.command || defaults_1.getDefaultSaveImageCommandName(), {
-                            pasteOptions: this.pasteOptions,
-                            event: event
-                        })];
-                }
-                return [2 /*return*/];
-            });
-        });
-    };
-    /**
-     * Executes the drop command
-     */
-    CommandOrchestrator.prototype.executeDropCommand = function (event) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                if (this.pasteOptions) {
-                    return [2 /*return*/, this.executeCommand(this.pasteOptions.command || defaults_1.getDefaultSaveImageCommandName(), {
-                            pasteOptions: this.pasteOptions,
-                            event: event
-                        })];
-                }
-                return [2 /*return*/];
-            });
-        });
-    };
-    /**
-     * Executes the "select image" command
-     */
-    CommandOrchestrator.prototype.executeSelectImageCommand = function (event) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                if (this.pasteOptions) {
-                    return [2 /*return*/, this.executeCommand(this.pasteOptions.command || defaults_1.getDefaultSaveImageCommandName(), {
-                            pasteOptions: this.pasteOptions,
-                            event: event
-                        })];
-                }
-                return [2 /*return*/];
-            });
-        });
-    };
-    /**
-     * Returns a command by name
-     * @param name
-     */
-    CommandOrchestrator.prototype.getCommandByName = function (name) {
-        return this.commandMap[name];
-    };
-    return CommandOrchestrator;
-}());
-exports.CommandOrchestrator = CommandOrchestrator;
-
-
-/***/ }),
-/* 42 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.extractKeyActivatedCommands = void 0;
-/**
- * Returns a flat array of commands that can be activated by the keyboard.
- * When keydowns happen, these commands 'handleKeyCommand' will be executed, in this order,
- * and the first that returns true will be executed.
- */
-function extractKeyActivatedCommands(commandMap) {
-    var result = [];
-    for (var command in commandMap) {
-        if (commandMap.hasOwnProperty(command)) {
-            if (commandMap[command].handleKeyCommand) {
-                result.push(command);
-            }
-        }
-    }
-    return result;
-}
-exports.extractKeyActivatedCommands = extractKeyActivatedCommands;
-
-
-/***/ }),
-/* 43 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.boldCommand = void 0;
-var MarkdownUtil_1 = __webpack_require__(16);
-exports.boldCommand = {
-    buttonProps: { "aria-label": "Add bold text" },
-    execute: function (_a) {
-        var initialState = _a.initialState, textApi = _a.textApi;
-        // Adjust the selection to encompass the whole word if the caret is inside one
-        var newSelectionRange = MarkdownUtil_1.selectWord({
-            text: initialState.text,
-            selection: initialState.selection
-        });
-        var state1 = textApi.setSelectionRange(newSelectionRange);
-        // Replaces the current selection with the bold mark up
-        var state2 = textApi.replaceSelection("**" + state1.selectedText + "**");
-        // Adjust the selection to not contain the **
-        textApi.setSelectionRange({
-            start: state2.selection.end - 2 - state1.selectedText.length,
-            end: state2.selection.end - 2
-        });
-    },
-    handleKeyCommand: function (e) { return (e.ctrlKey || e.metaKey) && e.key == "b"; }
-};
-
-
-/***/ }),
-/* 44 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.codeCommand = void 0;
-var MarkdownUtil_1 = __webpack_require__(16);
-exports.codeCommand = {
-    buttonProps: { "aria-label": "Insert code" },
-    execute: function (_a) {
-        var initialState = _a.initialState, textApi = _a.textApi;
-        // Adjust the selection to encompass the whole word if the caret is inside one
-        var newSelectionRange = MarkdownUtil_1.selectWord({
-            text: initialState.text,
-            selection: initialState.selection
-        });
-        var state1 = textApi.setSelectionRange(newSelectionRange);
-        // when there's no breaking line
-        if (state1.selectedText.indexOf("\n") === -1) {
-            textApi.replaceSelection("`" + state1.selectedText + "`");
-            // Adjust the selection to not contain the **
-            var selectionStart_1 = state1.selection.start + 1;
-            var selectionEnd_1 = selectionStart_1 + state1.selectedText.length;
-            textApi.setSelectionRange({
-                start: selectionStart_1,
-                end: selectionEnd_1
-            });
-            return;
-        }
-        var breaksBeforeCount = MarkdownUtil_1.getBreaksNeededForEmptyLineBefore(state1.text, state1.selection.start);
-        var breaksBefore = Array(breaksBeforeCount + 1).join("\n");
-        var breaksAfterCount = MarkdownUtil_1.getBreaksNeededForEmptyLineAfter(state1.text, state1.selection.end);
-        var breaksAfter = Array(breaksAfterCount + 1).join("\n");
-        textApi.replaceSelection(breaksBefore + "```\n" + state1.selectedText + "\n```" + breaksAfter);
-        var selectionStart = state1.selection.start + breaksBeforeCount + 4;
-        var selectionEnd = selectionStart + state1.selectedText.length;
-        textApi.setSelectionRange({
-            start: selectionStart,
-            end: selectionEnd
-        });
-    }
-};
-
-
-/***/ }),
-/* 45 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.headerCommand = void 0;
-var MarkdownUtil_1 = __webpack_require__(16);
-function setHeader(initialState, api, prefix) {
-    // Adjust the selection to encompass the whole word if the caret is inside one
-    var newSelectionRange = MarkdownUtil_1.selectWord({
-        text: initialState.text,
-        selection: initialState.selection
-    });
-    var state1 = api.setSelectionRange(newSelectionRange);
-    // Add the prefix to the selection
-    var state2 = api.replaceSelection("" + prefix + state1.selectedText);
-    // Adjust the selection to not contain the prefix
-    api.setSelectionRange({
-        start: state2.selection.end - state1.selectedText.length,
-        end: state2.selection.end
-    });
-}
-exports.headerCommand = {
-    buttonProps: { "aria-label": "Add header" },
-    execute: function (_a) {
-        var initialState = _a.initialState, textApi = _a.textApi;
-        setHeader(initialState, textApi, "### ");
-    }
-};
-
-
-/***/ }),
-/* 46 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.imageCommand = void 0;
-var MarkdownUtil_1 = __webpack_require__(16);
-exports.imageCommand = {
-    buttonProps: { "aria-label": "Add image" },
-    execute: function (_a) {
-        var initialState = _a.initialState, textApi = _a.textApi;
-        // Replaces the current selection with the whole word selected
-        var state1 = textApi.setSelectionRange(MarkdownUtil_1.selectWord({
-            text: initialState.text,
-            selection: initialState.selection
-        }));
-        // Replaces the current selection with the image
-        var imageTemplate = state1.selectedText || "https://example.com/your-image.png";
-        textApi.replaceSelection("![](" + imageTemplate + ")");
-        // Adjust the selection to not contain the **
-        textApi.setSelectionRange({
-            start: state1.selection.start + 4,
-            end: state1.selection.start + 4 + imageTemplate.length
-        });
-    }
-};
-
-
-/***/ }),
-/* 47 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.italicCommand = void 0;
-var MarkdownUtil_1 = __webpack_require__(16);
-exports.italicCommand = {
-    buttonProps: { "aria-label": "Add italic text" },
-    execute: function (_a) {
-        var initialState = _a.initialState, textApi = _a.textApi;
-        // Adjust the selection to encompass the whole word if the caret is inside one
-        var newSelectionRange = MarkdownUtil_1.selectWord({
-            text: initialState.text,
-            selection: initialState.selection
-        });
-        var state1 = textApi.setSelectionRange(newSelectionRange);
-        // Replaces the current selection with the italic mark up
-        var state2 = textApi.replaceSelection("*" + state1.selectedText + "*");
-        // Adjust the selection to not contain the *
-        textApi.setSelectionRange({
-            start: state2.selection.end - 1 - state1.selectedText.length,
-            end: state2.selection.end - 1
-        });
-    },
-    handleKeyCommand: function (e) { return (e.ctrlKey || e.metaKey) && e.key == "i"; }
-};
-
-
-/***/ }),
-/* 48 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.linkCommand = void 0;
-var MarkdownUtil_1 = __webpack_require__(16);
-exports.linkCommand = {
-    buttonProps: { "aria-label": "Add a link" },
-    execute: function (_a) {
-        var initialState = _a.initialState, textApi = _a.textApi;
-        // Adjust the selection to encompass the whole word if the caret is inside one
-        var newSelectionRange = MarkdownUtil_1.selectWord({
-            text: initialState.text,
-            selection: initialState.selection
-        });
-        var state1 = textApi.setSelectionRange(newSelectionRange);
-        // Replaces the current selection with the bold mark up
-        var state2 = textApi.replaceSelection("[" + state1.selectedText + "](url)");
-        // Adjust the selection to not contain the **
-        textApi.setSelectionRange({
-            start: state2.selection.end - 6 - state1.selectedText.length,
-            end: state2.selection.end - 6
-        });
-    },
-    handleKeyCommand: function (e) { return (e.ctrlKey || e.metaKey) && e.key == "k"; }
-};
-
-
-/***/ }),
-/* 49 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkedListCommand = exports.orderedListCommand = exports.unorderedListCommand = exports.makeList = exports.insertBeforeEachLine = void 0;
-var MarkdownUtil_1 = __webpack_require__(16);
-/**
- * Inserts insertionString before each line
- */
-function insertBeforeEachLine(selectedText, insertBefore) {
-    var lines = selectedText.split(/\n/);
-    var insertionLength = 0;
-    var modifiedText = lines
-        .map(function (item, index) {
-        if (typeof insertBefore === "string") {
-            insertionLength += insertBefore.length;
-            return insertBefore + item;
-        }
-        else if (typeof insertBefore === "function") {
-            var insertionResult = insertBefore(item, index);
-            insertionLength += insertionResult.length;
-            return insertBefore(item, index) + item;
-        }
-        throw Error("insertion is expected to be either a string or a function");
-    })
-        .join("\n");
-    return { modifiedText: modifiedText, insertionLength: insertionLength };
-}
-exports.insertBeforeEachLine = insertBeforeEachLine;
-var makeList = function (state0, api, insertBefore) {
-    // Adjust the selection to encompass the whole word if the caret is inside one
-    var newSelectionRange = MarkdownUtil_1.selectWord({
-        text: state0.text,
-        selection: state0.selection
-    });
-    var state1 = api.setSelectionRange(newSelectionRange);
-    var breaksBeforeCount = MarkdownUtil_1.getBreaksNeededForEmptyLineBefore(state1.text, state1.selection.start);
-    var breaksBefore = Array(breaksBeforeCount + 1).join("\n");
-    var breaksAfterCount = MarkdownUtil_1.getBreaksNeededForEmptyLineAfter(state1.text, state1.selection.end);
-    var breaksAfter = Array(breaksAfterCount + 1).join("\n");
-    var modifiedText = insertBeforeEachLine(state1.selectedText, insertBefore);
-    api.replaceSelection("" + breaksBefore + modifiedText.modifiedText + breaksAfter);
-    // Specifically when the text has only one line, we can exclude the "- ", for example, from the selection
-    var oneLinerOffset = state1.selectedText.indexOf("\n") === -1 ? modifiedText.insertionLength : 0;
-    var selectionStart = state1.selection.start + breaksBeforeCount + oneLinerOffset;
-    var selectionEnd = selectionStart + modifiedText.modifiedText.length - oneLinerOffset;
-    // Adjust the selection to not contain the **
-    api.setSelectionRange({
-        start: selectionStart,
-        end: selectionEnd
-    });
-};
-exports.makeList = makeList;
-exports.unorderedListCommand = {
-    buttonProps: { "aria-label": "Add unordered list" },
-    execute: function (_a) {
-        var initialState = _a.initialState, textApi = _a.textApi;
-        exports.makeList(initialState, textApi, "- ");
-    }
-};
-exports.orderedListCommand = {
-    buttonProps: { "aria-label": "Add ordered list" },
-    execute: function (_a) {
-        var initialState = _a.initialState, textApi = _a.textApi;
-        exports.makeList(initialState, textApi, function (item, index) { return index + 1 + ". "; });
-    }
-};
-exports.checkedListCommand = {
-    buttonProps: { "aria-label": "Add checked list" },
-    execute: function (_a) {
-        var initialState = _a.initialState, textApi = _a.textApi;
-        exports.makeList(initialState, textApi, function (item, index) { return "- [ ] "; });
-    }
-};
-
-
-/***/ }),
-/* 50 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.quoteCommand = void 0;
-var MarkdownUtil_1 = __webpack_require__(16);
-exports.quoteCommand = {
-    buttonProps: { "aria-label": "Insert a quote" },
-    execute: function (_a) {
-        var initialState = _a.initialState, textApi = _a.textApi;
-        // Adjust the selection to encompass the whole word if the caret is inside one
-        var newSelectionRange = MarkdownUtil_1.selectWord({
-            text: initialState.text,
-            selection: initialState.selection
-        });
-        var state1 = textApi.setSelectionRange(newSelectionRange);
-        var breaksBeforeCount = MarkdownUtil_1.getBreaksNeededForEmptyLineBefore(state1.text, state1.selection.start);
-        var breaksBefore = Array(breaksBeforeCount + 1).join("\n");
-        var breaksAfterCount = MarkdownUtil_1.getBreaksNeededForEmptyLineAfter(state1.text, state1.selection.end);
-        var breaksAfter = Array(breaksAfterCount + 1).join("\n");
-        // Replaces the current selection with the quote mark up
-        textApi.replaceSelection(breaksBefore + "> " + state1.selectedText + breaksAfter);
-        var selectionStart = state1.selection.start + breaksBeforeCount + 2;
-        var selectionEnd = selectionStart + state1.selectedText.length;
-        textApi.setSelectionRange({
-            start: selectionStart,
-            end: selectionEnd
-        });
-    }
-};
-
-
-/***/ }),
-/* 51 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveImageCommand = void 0;
-var files_1 = __webpack_require__(61);
-var MarkdownUtil_1 = __webpack_require__(16);
-function dataTransferToArray(items) {
-    var result = [];
-    for (var index in items) {
-        var item = items[index];
-        if (item.kind === "file") {
-            result.push(item.getAsFile());
-        }
-    }
-    return result;
-}
-function fileListToArray(list) {
-    var result = [];
-    for (var i = 0; i < list.length; i++) {
-        result.push(list[0]);
-    }
-    return result;
-}
-function filterItems(items, _a) {
-    var multiple = _a.multiple, accept = _a.accept;
-    var filteredItems = items;
-    if (!multiple) {
-        filteredItems = filteredItems.slice(0, 1);
-    }
-    if (accept) {
-        //https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file_type_specifiers
-        var acceptedTypes = accept.split(",");
-        var fileExtensions_1 = new Set(acceptedTypes.filter(function (t) { return /^\.\w+/.test(t); }).map(function (t) { return t.split(".")[1]; }));
-        var mimeTypes_1 = new Set(acceptedTypes.filter(function (t) { return /^[-\w.]+\/[-\w.]+$/.test(t); }));
-        var anyTypes_1 = new Set(acceptedTypes
-            .filter(function (t) { return /(audio|video|image)\/\*/.test(t); })
-            .map(function (t) { return t.split("/")[0]; }));
-        filteredItems = filteredItems.filter(function (f) {
-            return fileExtensions_1.has(f.name.split(".")[1]) ||
-                mimeTypes_1.has(f.type) ||
-                anyTypes_1.has(f.type.split("/")[0]);
-        });
-    }
-    return filteredItems;
-}
-exports.saveImageCommand = {
-    execute: function (_a) {
-        var initialState = _a.initialState, textApi = _a.textApi, context = _a.context, l18n = _a.l18n;
-        return __awaiter(this, void 0, void 0, function () {
-            var pasteContext, event, _b, saveImage, multiple, accept, items, filteredItems, _c, _d, _i, index, initialState_1, breaksBeforeCount, breaksBefore, placeHolder, blob, blobContents, savingImage, imageUrl, newState, uploadingText, realImageMarkdown, selectionDelta;
-            return __generator(this, function (_e) {
-                switch (_e.label) {
-                    case 0:
-                        if (!context) {
-                            throw new Error("wrong context");
-                        }
-                        pasteContext = context;
-                        event = pasteContext.event, _b = pasteContext.pasteOptions, saveImage = _b.saveImage, multiple = _b.multiple, accept = _b.accept;
-                        items = isPasteEvent(context)
-                            ? dataTransferToArray(event.clipboardData.items)
-                            : isDragEvent(context)
-                                ? dataTransferToArray(event.dataTransfer.items)
-                                : fileListToArray(event.target.files);
-                        filteredItems = filterItems(items, { multiple: multiple, accept: accept });
-                        _c = [];
-                        for (_d in filteredItems)
-                            _c.push(_d);
-                        _i = 0;
-                        _e.label = 1;
-                    case 1:
-                        if (!(_i < _c.length)) return [3 /*break*/, 5];
-                        index = _c[_i];
-                        initialState_1 = textApi.getState();
-                        breaksBeforeCount = MarkdownUtil_1.getBreaksNeededForEmptyLineBefore(initialState_1.text, initialState_1.selection.start);
-                        breaksBefore = Array(breaksBeforeCount + 1).join("\n");
-                        placeHolder = breaksBefore + "![" + l18n.uploadingImage + "]()";
-                        textApi.replaceSelection(placeHolder);
-                        blob = items[index];
-                        return [4 /*yield*/, files_1.readFileAsync(blob)];
-                    case 2:
-                        blobContents = _e.sent();
-                        savingImage = saveImage(blobContents, blob);
-                        return [4 /*yield*/, savingImage.next()];
-                    case 3:
-                        imageUrl = (_e.sent()).value;
-                        newState = textApi.getState();
-                        uploadingText = newState.text.substr(initialState_1.selection.start, placeHolder.length);
-                        if (uploadingText === placeHolder) {
-                            // In this case, the user did not touch the placeholder. Good user
-                            // we will replace it with the real one that came from the server
-                            textApi.setSelectionRange({
-                                start: initialState_1.selection.start,
-                                end: initialState_1.selection.start + placeHolder.length
-                            });
-                            realImageMarkdown = imageUrl
-                                ? breaksBefore + "![image](" + imageUrl + ")"
-                                : "";
-                            selectionDelta = realImageMarkdown.length - placeHolder.length;
-                            textApi.replaceSelection(realImageMarkdown);
-                            textApi.setSelectionRange({
-                                start: newState.selection.start + selectionDelta,
-                                end: newState.selection.end + selectionDelta
-                            });
-                        }
-                        _e.label = 4;
-                    case 4:
-                        _i++;
-                        return [3 /*break*/, 1];
-                    case 5: return [2 /*return*/];
-                }
-            });
-        });
-    }
-};
-function isPasteEvent(context) {
-    return (context.event
-        .clipboardData !== undefined);
-}
-function isDragEvent(context) {
-    return (context.event.dataTransfer !==
-        undefined);
-}
-
-
-/***/ }),
-/* 52 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.strikeThroughCommand = void 0;
-var MarkdownUtil_1 = __webpack_require__(16);
-exports.strikeThroughCommand = {
-    buttonProps: { "aria-label": "Add strikethrough text" },
-    execute: function (_a) {
-        var initialState = _a.initialState, textApi = _a.textApi;
-        // Adjust the selection to encompass the whole word if the caret is inside one
-        var newSelectionRange = MarkdownUtil_1.selectWord({
-            text: initialState.text,
-            selection: initialState.selection
-        });
-        var state1 = textApi.setSelectionRange(newSelectionRange);
-        // Replaces the current selection with the strikethrough mark up
-        var state2 = textApi.replaceSelection("~~" + state1.selectedText + "~~");
-        // Adjust the selection to not contain the ~~
-        textApi.setSelectionRange({
-            start: state2.selection.end - 2 - state1.selectedText.length,
-            end: state2.selection.end - 2
-        });
-    }
-};
-
-
-/***/ }),
-/* 53 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Preview = void 0;
-var React = __webpack_require__(2);
-var ClassNames_1 = __webpack_require__(17);
-var Preview = /** @class */ (function (_super) {
-    __extends(Preview, _super);
-    function Preview(props) {
-        var _this = _super.call(this, props) || this;
-        _this.state = {
-            loading: true
-        };
-        return _this;
-    }
-    Preview.prototype.componentDidMount = function () {
-        this.generatePreview();
-    };
-    Preview.prototype.componentDidUpdate = function (prevProps, prevState) {
-        if (this.props.markdown !== prevProps.markdown) {
-            this.generatePreview();
-        }
-    };
-    Preview.prototype.generatePreview = function () {
-        var _this = this;
-        var _a = this.props, markdown = _a.markdown, generateMarkdownPreview = _a.generateMarkdownPreview;
-        generateMarkdownPreview(markdown).then(function (preview) {
-            _this.setState({
-                preview: preview,
-                loading: false
-            });
-        });
-    };
-    Preview.prototype.render = function () {
-        var _a = this.props, classes = _a.classes, minHeight = _a.minHeight, loadingPreview = _a.loadingPreview, refObject = _a.refObject, heightUnits = _a.heightUnits;
-        var _b = this.state, preview = _b.preview, loading = _b.loading;
-        var finalHtml = loading ? loadingPreview : preview;
-        var content;
-        if (typeof finalHtml === "string") {
-            content = (React.createElement("div", { className: "mde-preview-content", dangerouslySetInnerHTML: { __html: finalHtml || "<p>&nbsp;</p>" }, ref: refObject }));
-        }
-        else {
-            content = React.createElement("div", { className: "mde-preview-content" }, finalHtml);
-        }
-        var minHeightVal = minHeight && heightUnits ? minHeight + 10 + heightUnits : minHeight + 10;
-        return (React.createElement("div", { className: ClassNames_1.classNames("mde-preview", classes, { loading: loading }), style: { minHeight: minHeightVal }, "data-testid": "mde-preview" }, content));
-    };
-    return Preview;
-}(React.Component));
-exports.Preview = Preview;
-
-
-/***/ }),
-/* 54 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReactMde = void 0;
-var React = __webpack_require__(2);
-var _1 = __webpack_require__(25);
-var defaults_1 = __webpack_require__(19);
-var react_mde_en_1 = __webpack_require__(58);
-var icons_1 = __webpack_require__(27);
-var ClassNames_1 = __webpack_require__(17);
-var command_orchestrator_1 = __webpack_require__(41);
-var pasteOptionDefaults = {
-    accept: "image/*",
-    multiple: false
-};
-var ReactMde = /** @class */ (function (_super) {
-    __extends(ReactMde, _super);
-    function ReactMde(props) {
-        var _a;
-        var _this = _super.call(this, props) || this;
-        _this.handleTextChange = function (value) {
-            var onChange = _this.props.onChange;
-            onChange(value);
-        };
-        _this.handlePaste = function (event) { return __awaiter(_this, void 0, void 0, function () {
-            var paste;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        paste = this.props.paste;
-                        if (!paste || !paste.saveImage) {
-                            return [2 /*return*/];
-                        }
-                        return [4 /*yield*/, this.commandOrchestrator.executePasteCommand(event)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        }); };
-        _this.handleDrop = function (event) { return __awaiter(_this, void 0, void 0, function () {
-            var paste;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        paste = this.props.paste;
-                        if (!paste || !paste.saveImage) {
-                            return [2 /*return*/];
-                        }
-                        return [4 /*yield*/, this.commandOrchestrator.executeDropCommand(event)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        }); };
-        _this.handleImageSelection = function (event) { return __awaiter(_this, void 0, void 0, function () {
-            var paste;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        paste = this.props.paste;
-                        if (!paste || !paste.saveImage) {
-                            return [2 /*return*/];
-                        }
-                        return [4 /*yield*/, this.commandOrchestrator.executeSelectImageCommand(event)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        }); };
-        _this.handleTabChange = function (newTab) {
-            var onTabChange = _this.props.onTabChange;
-            onTabChange(newTab);
-        };
-        _this.handleCommand = function (commandName) { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.commandOrchestrator.executeCommand(commandName)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        }); };
-        _this.finalRefs = __assign({}, (props.refs || {}));
-        if (!_this.finalRefs.textarea) {
-            _this.finalRefs.textarea = React.createRef();
-        }
-        if (!_this.finalRefs.preview) {
-            _this.finalRefs.preview = React.createRef();
-        }
-        _this.commandOrchestrator = new command_orchestrator_1.CommandOrchestrator(_this.props.commands, _this.finalRefs.textarea, _this.props.l18n, _this.props.paste
-            ? __assign(__assign({}, pasteOptionDefaults), _this.props.paste) : undefined);
-        var minEditorHeight = Math.min(props.maxEditorHeight, props.minEditorHeight);
-        _this.state = {
-            editorHeight: (_a = props.initialEditorHeight) !== null && _a !== void 0 ? _a : minEditorHeight
-        };
-        return _this;
-    }
-    ReactMde.prototype.render = function () {
-        var _this = this;
-        var _a, _b;
-        var _c = this.props, getIcon = _c.getIcon, toolbarCommands = _c.toolbarCommands, classes = _c.classes, loadingPreview = _c.loadingPreview, readOnly = _c.readOnly, disablePreview = _c.disablePreview, value = _c.value, l18n = _c.l18n, minPreviewHeight = _c.minPreviewHeight, heightUnits = _c.heightUnits, childProps = _c.childProps, selectedTab = _c.selectedTab, generateMarkdownPreview = _c.generateMarkdownPreview, loadSuggestions = _c.loadSuggestions, suggestionTriggerCharacters = _c.suggestionTriggerCharacters, textAreaComponent = _c.textAreaComponent;
-        var finalChildProps = childProps || {};
-        var toolbarButtons = toolbarCommands.map(function (group) {
-            return group.map(function (commandName) {
-                var command = _this.commandOrchestrator.getCommand(commandName);
-                return {
-                    commandName: commandName,
-                    buttonContent: command.icon
-                        ? command.icon(getIcon)
-                        : getIcon(commandName),
-                    buttonProps: command.buttonProps,
-                    buttonComponentClass: command.buttonComponentClass
-                };
-            });
-        });
-        return (React.createElement("div", { className: ClassNames_1.classNames("react-mde", "react-mde-tabbed-layout", classes === null || classes === void 0 ? void 0 : classes.reactMde) },
-            React.createElement(_1.Toolbar, { classes: classes === null || classes === void 0 ? void 0 : classes.toolbar, buttons: toolbarButtons, onCommand: this.handleCommand, onTabChange: this.handleTabChange, tab: selectedTab, readOnly: readOnly, disablePreview: disablePreview, l18n: l18n, buttonProps: finalChildProps.commandButtons, writeButtonProps: finalChildProps.writeButton, previewButtonProps: finalChildProps.previewButton }),
-            React.createElement("div", { className: ClassNames_1.classNames({ invisible: selectedTab !== "write" }) },
-                React.createElement(_1.TextArea, { classes: classes === null || classes === void 0 ? void 0 : classes.textArea, suggestionsDropdownClasses: classes === null || classes === void 0 ? void 0 : classes.suggestionsDropdown, suggestionsAutoplace: this.props.suggestionsAutoplace, refObject: this.finalRefs.textarea, onChange: this.handleTextChange, onPaste: this.handlePaste, onDrop: this.handleDrop, readOnly: readOnly, textAreaComponent: textAreaComponent, textAreaProps: childProps && childProps.textArea, height: this.state.editorHeight, heightUnits: this.props.heightUnits, value: value, suggestionTriggerCharacters: suggestionTriggerCharacters, loadSuggestions: loadSuggestions, onPossibleKeyCommand: this.commandOrchestrator.handlePossibleKeyCommand }),
-                this.props.paste && (React.createElement("label", { className: ClassNames_1.classNames("image-tip") },
-                    React.createElement("input", { className: ClassNames_1.classNames("image-input"), type: "file", accept: (_a = this.props.paste.accept) !== null && _a !== void 0 ? _a : pasteOptionDefaults.accept, multiple: (_b = this.props.paste.multiple) !== null && _b !== void 0 ? _b : pasteOptionDefaults.multiple, onChange: this.handleImageSelection }),
-                    React.createElement("span", null, l18n.pasteDropSelect)))),
-            selectedTab !== "write" && (React.createElement(_1.Preview, { classes: classes === null || classes === void 0 ? void 0 : classes.preview, refObject: this.finalRefs.preview, loadingPreview: loadingPreview, minHeight: minPreviewHeight, heightUnits: heightUnits, generateMarkdownPreview: generateMarkdownPreview, markdown: value }))));
-    };
-    ReactMde.defaultProps = {
-        commands: defaults_1.getDefaultCommandMap(),
-        toolbarCommands: defaults_1.getDefaultToolbarCommands(),
-        getIcon: function (name) { return React.createElement(icons_1.SvgIcon, { icon: name }); },
-        readOnly: false,
-        l18n: react_mde_en_1.enL18n,
-        minEditorHeight: 200,
-        maxEditorHeight: 500,
-        minPreviewHeight: 200,
-        heightUnits: "px",
-        selectedTab: "write",
-        disablePreview: false,
-        suggestionTriggerCharacters: ["@"],
-        suggestionsAutoplace: false
-    };
-    return ReactMde;
-}(React.Component));
-exports.ReactMde = ReactMde;
-
-
-/***/ }),
-/* 55 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.TextArea = void 0;
-var React = __webpack_require__(2);
-var ClassNames_1 = __webpack_require__(17);
-var TextAreaCaretPosition_1 = __webpack_require__(60);
-var InsertTextAtPosition_1 = __webpack_require__(29);
-var Math_1 = __webpack_require__(59);
-var SuggestionsDropdown_1 = __webpack_require__(22);
-var TextArea = /** @class */ (function (_super) {
-    __extends(TextArea, _super);
-    function TextArea(props) {
-        var _this = _super.call(this, props) || this;
-        _this.currentLoadSuggestionsPromise = Promise.resolve(undefined);
-        /**
-         * suggestionsPromiseIndex exists as a means to cancel what happens when the suggestions promise finishes loading.
-         *
-         * When the user is searching for suggestions, there is a promise that, when resolved, causes a re-render.
-         * However, in case there is another promise to be resolved after the current one, it does not make sense to re-render
-         * only to re-render again after the next one is complete.
-         *
-         * When there is a promise loading and the user cancels the suggestion, you don't want the status to go back to "active"
-         * when the promise resolves.
-         *
-         * suggestionsPromiseIndex increments every time the mentions query
-         */
-        _this.suggestionsPromiseIndex = 0;
-        _this.getTextArea = function () {
-            return _this.props.refObject.current;
-        };
-        _this.handleOnChange = function (event) {
-            var onChange = _this.props.onChange;
-            onChange(event.target.value);
-        };
-        _this.handleBlur = function () {
-            var mention = _this.state.mention;
-            if (mention) {
-                _this.setState({ mention: { status: "inactive", suggestions: [] } });
-            }
-        };
-        _this.startLoadingSuggestions = function (text) {
-            var promiseIndex = ++_this.suggestionsPromiseIndex;
-            var loadSuggestions = _this.props.loadSuggestions;
-            _this.currentLoadSuggestionsPromise = _this.currentLoadSuggestionsPromise
-                .then(function () { return loadSuggestions(text, _this.state.mention.triggeredBy); })
-                .then(function (suggestions) {
-                if (_this.state.mention.status === "inactive") {
-                    // This means this promise resolved too late when the status has already been set to inactice
-                    return;
-                }
-                else if (_this.suggestionsPromiseIndex === promiseIndex) {
-                    if (!suggestions || !suggestions.length) {
-                        _this.setState({
-                            mention: {
-                                status: "inactive",
-                                suggestions: []
-                            }
-                        });
-                    }
-                    else {
-                        _this.setState({
-                            mention: __assign(__assign({}, _this.state.mention), { status: "active", suggestions: suggestions, focusIndex: 0 })
-                        });
-                    }
-                    _this.suggestionsPromiseIndex = 0;
-                }
-                return Promise.resolve();
-            });
-        };
-        _this.loadEmptySuggestion = function (target, key) {
-            var caret = TextAreaCaretPosition_1.getCaretCoordinates(target, key);
-            _this.startLoadingSuggestions("");
-            _this.setState({
-                mention: {
-                    status: "loading",
-                    startPosition: target.selectionStart + 1,
-                    caret: caret,
-                    suggestions: [],
-                    triggeredBy: key
-                }
-            });
-        };
-        _this.handleSuggestionSelected = function (index) {
-            var mention = _this.state.mention;
-            _this.getTextArea().selectionStart = mention.startPosition - 1;
-            var textForInsert = _this.props.value.substr(_this.getTextArea().selectionStart, _this.getTextArea().selectionEnd - _this.getTextArea().selectionStart);
-            InsertTextAtPosition_1.insertText(_this.getTextArea(), mention.suggestions[index].value + " ");
-            _this.setState({
-                mention: {
-                    status: "inactive",
-                    suggestions: []
-                }
-            });
-        };
-        _this.handleKeyDown = function (event) {
-            if (_this.props.onPossibleKeyCommand) {
-                var handled = _this.props.onPossibleKeyCommand(event);
-                if (handled) {
-                    event.preventDefault();
-                    // If the keydown resulted in a command being executed, we will just close the suggestions if they are open.
-                    // Resetting suggestionsPromiseIndex will cause any promise that is yet to be resolved to have no effect
-                    // when they finish loading.
-                    // TODO: The code below is duplicate, we need to clean this up
-                    _this.suggestionsPromiseIndex = 0;
-                    _this.setState({
-                        mention: {
-                            status: "inactive",
-                            suggestions: []
-                        }
-                    });
-                    return;
-                }
-            }
-            if (!_this.suggestionsEnabled()) {
-                return;
-            }
-            var key = event.key, shiftKey = event.shiftKey, currentTarget = event.currentTarget;
-            var selectionStart = currentTarget.selectionStart;
-            var mention = _this.state.mention;
-            switch (mention.status) {
-                case "loading":
-                case "active":
-                    if (key === "Escape" ||
-                        (key === "Backspace" &&
-                            selectionStart <= _this.state.mention.startPosition)) {
-                        // resetting suggestionsPromiseIndex will cause any promise that is yet to be resolved to have no effect
-                        // when they finish loading.
-                        _this.suggestionsPromiseIndex = 0;
-                        _this.setState({
-                            mention: {
-                                status: "inactive",
-                                suggestions: []
-                            }
-                        });
-                    }
-                    else if (mention.status === "active" &&
-                        (key === "ArrowUp" || key === "ArrowDown") &&
-                        !shiftKey) {
-                        event.preventDefault();
-                        var focusDelta = key === "ArrowUp" ? -1 : 1;
-                        _this.setState({
-                            mention: __assign(__assign({}, mention), { focusIndex: Math_1.mod(mention.focusIndex + focusDelta, mention.suggestions.length) })
-                        });
-                    }
-                    else if (key === "Enter" &&
-                        mention.status === "active" &&
-                        mention.suggestions.length) {
-                        event.preventDefault();
-                        _this.handleSuggestionSelected(mention.focusIndex);
-                    }
-                    break;
-                default:
-                // Ignore
-            }
-        };
-        _this.handleKeyUp = function (event) {
-            var key = event.key;
-            var mention = _this.state.mention;
-            var _a = _this.props, suggestionTriggerCharacters = _a.suggestionTriggerCharacters, value = _a.value;
-            switch (mention.status) {
-                case "loading":
-                case "active":
-                    if (key === "Backspace") {
-                        var searchText = value.substr(mention.startPosition, _this.getTextArea().selectionStart - mention.startPosition);
-                        _this.startLoadingSuggestions(searchText);
-                        if (mention.status !== "loading") {
-                            _this.setState({
-                                mention: __assign(__assign({}, _this.state.mention), { status: "loading" })
-                            });
-                        }
-                    }
-                    break;
-                case "inactive":
-                    if (key === "Backspace") {
-                        var prevChar = value.charAt(_this.getTextArea().selectionStart - 1);
-                        var isAtMention = suggestionTriggerCharacters.includes(value.charAt(_this.getTextArea().selectionStart - 1));
-                        if (isAtMention) {
-                            _this.loadEmptySuggestion(event.currentTarget, prevChar);
-                        }
-                    }
-                    break;
-                default:
-                // Ignore
-            }
-        };
-        _this.handleKeyPress = function (event) {
-            var _a = _this.props, suggestionTriggerCharacters = _a.suggestionTriggerCharacters, value = _a.value;
-            var mention = _this.state.mention;
-            var key = event.key;
-            switch (mention.status) {
-                case "loading":
-                case "active":
-                    if (key === " ") {
-                        _this.setState({
-                            mention: __assign(__assign({}, _this.state.mention), { status: "inactive" })
-                        });
-                        return;
-                    }
-                    var searchText = value.substr(mention.startPosition, _this.getTextArea().selectionStart - mention.startPosition) + key;
-                    // In this case, the mentions box was open but the user typed something else
-                    _this.startLoadingSuggestions(searchText);
-                    if (mention.status !== "loading") {
-                        _this.setState({
-                            mention: __assign(__assign({}, _this.state.mention), { status: "loading" })
-                        });
-                    }
-                    break;
-                case "inactive":
-                    if (suggestionTriggerCharacters.indexOf(event.key) === -1 ||
-                        !/\s|\(|\[|^.{0}$/.test(value.charAt(_this.getTextArea().selectionStart - 1))) {
-                        return;
-                    }
-                    _this.loadEmptySuggestion(event.currentTarget, event.key);
-                    break;
-            }
-        };
-        _this.state = { mention: { status: "inactive", suggestions: [] } };
-        return _this;
-    }
-    TextArea.prototype.suggestionsEnabled = function () {
-        return (this.props.suggestionTriggerCharacters &&
-            this.props.suggestionTriggerCharacters.length &&
-            this.props.loadSuggestions);
-    };
-    TextArea.prototype.render = function () {
-        var _this = this;
-        var _a = this.props, classes = _a.classes, readOnly = _a.readOnly, textAreaProps = _a.textAreaProps, height = _a.height, heightUnits = _a.heightUnits, value = _a.value, suggestionTriggerCharacters = _a.suggestionTriggerCharacters, loadSuggestions = _a.loadSuggestions, suggestionsDropdownClasses = _a.suggestionsDropdownClasses, textAreaComponent = _a.textAreaComponent, onPaste = _a.onPaste, onDrop = _a.onDrop;
-        var suggestionsEnabled = suggestionTriggerCharacters &&
-            suggestionTriggerCharacters.length &&
-            loadSuggestions;
-        var mention = this.state.mention;
-        var TextAreaComponent = (textAreaComponent ||
-            "textarea");
-        var heightVal = height && heightUnits ? height + heightUnits : height;
-        return (React.createElement("div", { className: "mde-textarea-wrapper" },
-            React.createElement(TextAreaComponent, __assign({ className: ClassNames_1.classNames("mde-text", classes), style: { height: heightVal }, ref: this.props.refObject, readOnly: readOnly, value: value, "data-testid": "text-area" }, textAreaProps, { onChange: function (event) {
-                    var _a;
-                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onChange) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
-                    _this.handleOnChange(event);
-                }, onBlur: function (event) {
-                    var _a;
-                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onBlur) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
-                    if (suggestionsEnabled) {
-                        _this.handleBlur();
-                    }
-                }, onKeyDown: function (event) {
-                    var _a;
-                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onKeyDown) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
-                    _this.handleKeyDown(event);
-                }, onKeyUp: function (event) {
-                    var _a;
-                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onKeyUp) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
-                    if (suggestionsEnabled) {
-                        _this.handleKeyUp(event);
-                    }
-                }, onKeyPress: function (event) {
-                    var _a;
-                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onKeyPress) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
-                    if (suggestionsEnabled) {
-                        _this.handleKeyPress(event);
-                    }
-                }, onPaste: function (event) {
-                    var _a;
-                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onPaste) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
-                    onPaste(event);
-                }, onDragOver: function (event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }, onDrop: function (event) {
-                    var _a;
-                    (_a = textAreaProps === null || textAreaProps === void 0 ? void 0 : textAreaProps.onDrop) === null || _a === void 0 ? void 0 : _a.call(textAreaProps, event);
-                    onDrop(event);
-                    event.preventDefault();
-                } })),
-            mention.status === "active" && mention.suggestions.length && (React.createElement(SuggestionsDropdown_1.SuggestionsDropdown, { classes: suggestionsDropdownClasses, caret: mention.caret, suggestions: mention.suggestions, onSuggestionSelected: this.handleSuggestionSelected, suggestionsAutoplace: this.props.suggestionsAutoplace, focusIndex: mention.focusIndex, textAreaRef: this.props.refObject }))));
-    };
-    return TextArea;
-}(React.Component));
-exports.TextArea = TextArea;
-
-
-/***/ }),
-/* 56 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Toolbar = void 0;
-var React = __webpack_require__(2);
-var ClassNames_1 = __webpack_require__(17);
-var ToolbarButtonGroup_1 = __webpack_require__(24);
-var ToolbarButton_1 = __webpack_require__(23);
-var Toolbar = /** @class */ (function (_super) {
-    __extends(Toolbar, _super);
-    function Toolbar() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.handleTabChange = function (tab) {
-            var onTabChange = _this.props.onTabChange;
-            onTabChange(tab);
-        };
-        return _this;
-    }
-    Toolbar.prototype.render = function () {
-        var _this = this;
-        var l18n = this.props.l18n;
-        var _a = this.props, classes = _a.classes, children = _a.children, buttons = _a.buttons, onCommand = _a.onCommand, readOnly = _a.readOnly, disablePreview = _a.disablePreview, writeButtonProps = _a.writeButtonProps, previewButtonProps = _a.previewButtonProps, buttonProps = _a.buttonProps;
-        if ((!buttons || buttons.length === 0) && !children) {
-            return null;
-        }
-        var writePreviewTabs = (React.createElement("div", { className: "mde-tabs" },
-            React.createElement("button", __assign({ type: "button", className: ClassNames_1.classNames({ selected: this.props.tab === "write" }), onClick: function () { return _this.handleTabChange("write"); } }, writeButtonProps), l18n.write),
-            React.createElement("button", __assign({ type: "button", className: ClassNames_1.classNames({ selected: this.props.tab === "preview" }), onClick: function () { return _this.handleTabChange("preview"); } }, previewButtonProps), l18n.preview)));
-        return (React.createElement("div", { className: ClassNames_1.classNames("mde-header", classes) },
-            !disablePreview && writePreviewTabs,
-            buttons.map(function (commandGroup, i) { return (React.createElement(ToolbarButtonGroup_1.ToolbarButtonGroup, { key: i, hidden: _this.props.tab === "preview" }, commandGroup.map(function (c, j) {
-                return (React.createElement(ToolbarButton_1.ToolbarButton, { key: j, name: c.commandName, buttonContent: c.buttonContent, buttonProps: __assign(__assign({}, (buttonProps || {})), c.buttonProps), onClick: function () { return onCommand(c.commandName); }, readOnly: readOnly, buttonComponentClass: c.buttonComponentClass }));
-            }))); })));
-    };
-    return Toolbar;
-}(React.Component));
-exports.Toolbar = Toolbar;
-
-
-/***/ }),
-/* 57 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SvgIcon = void 0;
-var React = __webpack_require__(2);
-var checkedListIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "tasks", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
-    React.createElement("path", { fill: "currentColor", d: "M208 132h288c8.8 0 16-7.2 16-16V76c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16v40c0 8.8 7.2 16 16 16zm0 160h288c8.8 0 16-7.2 16-16v-40c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16v40c0 8.8 7.2 16 16 16zm0 160h288c8.8 0 16-7.2 16-16v-40c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16v40c0 8.8 7.2 16 16 16zM64 368c-26.5 0-48.6 21.5-48.6 48s22.1 48 48.6 48 48-21.5 48-48-21.5-48-48-48zm92.5-299l-72.2 72.2-15.6 15.6c-4.7 4.7-12.9 4.7-17.6 0L3.5 109.4c-4.7-4.7-4.7-12.3 0-17l15.7-15.7c4.7-4.7 12.3-4.7 17 0l22.7 22.1 63.7-63.3c4.7-4.7 12.3-4.7 17 0l17 16.5c4.6 4.7 4.6 12.3-.1 17zm0 159.6l-72.2 72.2-15.7 15.7c-4.7 4.7-12.9 4.7-17.6 0L3.5 269c-4.7-4.7-4.7-12.3 0-17l15.7-15.7c4.7-4.7 12.3-4.7 17 0l22.7 22.1 63.7-63.7c4.7-4.7 12.3-4.7 17 0l17 17c4.6 4.6 4.6 12.2-.1 16.9z" })));
-var orderedListIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "list-ol", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
-    React.createElement("path", { fill: "currentColor", d: "M3.263 139.527c0-7.477 3.917-11.572 11.573-11.572h15.131V88.078c0-5.163.534-10.503.534-10.503h-.356s-1.779 2.67-2.848 3.738c-4.451 4.273-10.504 4.451-15.666-1.068l-5.518-6.231c-5.342-5.341-4.984-11.216.534-16.379l21.72-19.938C32.815 33.602 36.732 32 42.785 32H54.89c7.656 0 11.749 3.916 11.749 11.572v84.384h15.488c7.655 0 11.572 4.094 11.572 11.572v8.901c0 7.477-3.917 11.572-11.572 11.572H14.836c-7.656 0-11.573-4.095-11.573-11.572v-8.902zM2.211 304.591c0-47.278 50.955-56.383 50.955-69.165 0-7.18-5.954-8.755-9.28-8.755-3.153 0-6.479 1.051-9.455 3.852-5.079 4.903-10.507 7.004-16.111 2.451l-8.579-6.829c-5.779-4.553-7.18-9.805-2.803-15.409C13.592 201.981 26.025 192 47.387 192c19.437 0 44.476 10.506 44.476 39.573 0 38.347-46.753 46.402-48.679 56.909h39.049c7.529 0 11.557 4.027 11.557 11.382v8.755c0 7.354-4.028 11.382-11.557 11.382h-67.94c-7.005 0-12.083-4.028-12.083-11.382v-4.028zM5.654 454.61l5.603-9.28c3.853-6.654 9.105-7.004 15.584-3.152 4.903 2.101 9.63 3.152 14.359 3.152 10.155 0 14.358-3.502 14.358-8.23 0-6.654-5.604-9.106-15.934-9.106h-4.728c-5.954 0-9.28-2.101-12.258-7.88l-1.05-1.926c-2.451-4.728-1.226-9.806 2.801-14.884l5.604-7.004c6.829-8.405 12.257-13.483 12.257-13.483v-.35s-4.203 1.051-12.608 1.051H16.685c-7.53 0-11.383-4.028-11.383-11.382v-8.755c0-7.53 3.853-11.382 11.383-11.382h58.484c7.529 0 11.382 4.027 11.382 11.382v3.327c0 5.778-1.401 9.806-5.079 14.183l-17.509 20.137c19.611 5.078 28.716 20.487 28.716 34.845 0 21.363-14.358 44.126-48.503 44.126-16.636 0-28.192-4.728-35.896-9.455-5.779-4.202-6.304-9.805-2.626-15.934zM144 132h352c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z" })));
-var unorderedListIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "list-ul", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
-    React.createElement("path", { fill: "currentColor", d: "M96 96c0 26.51-21.49 48-48 48S0 122.51 0 96s21.49-48 48-48 48 21.49 48 48zM48 208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm0 160c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm96-236h352c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z" })));
-var imageIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "image", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
-    React.createElement("path", { fill: "currentColor", d: "M464 448H48c-26.51 0-48-21.49-48-48V112c0-26.51 21.49-48 48-48h416c26.51 0 48 21.49 48 48v288c0 26.51-21.49 48-48 48zM112 120c-30.928 0-56 25.072-56 56s25.072 56 56 56 56-25.072 56-56-25.072-56-56-56zM64 384h384V272l-87.515-87.515c-4.686-4.686-12.284-4.686-16.971 0L208 320l-55.515-55.515c-4.686-4.686-12.284-4.686-16.971 0L64 336v48z" })));
-var codeIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "code", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 640 512", "data-fa-i2svg": "" },
-    React.createElement("path", { fill: "currentColor", d: "M278.9 511.5l-61-17.7c-6.4-1.8-10-8.5-8.2-14.9L346.2 8.7c1.8-6.4 8.5-10 14.9-8.2l61 17.7c6.4 1.8 10 8.5 8.2 14.9L293.8 503.3c-1.9 6.4-8.5 10.1-14.9 8.2zm-114-112.2l43.5-46.4c4.6-4.9 4.3-12.7-.8-17.2L117 256l90.6-79.7c5.1-4.5 5.5-12.3.8-17.2l-43.5-46.4c-4.5-4.8-12.1-5.1-17-.5L3.8 247.2c-5.1 4.7-5.1 12.8 0 17.5l144.1 135.1c4.9 4.6 12.5 4.4 17-.5zm327.2.6l144.1-135.1c5.1-4.7 5.1-12.8 0-17.5L492.1 112.1c-4.8-4.5-12.4-4.3-17 .5L431.6 159c-4.6 4.9-4.3 12.7.8 17.2L523 256l-90.6 79.7c-5.1 4.5-5.5 12.3-.8 17.2l43.5 46.4c4.5 4.9 12.1 5.1 17 .6z" })));
-var quoteIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "quote-right", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
-    React.createElement("path", { fill: "currentColor", d: "M512 80v128c0 137.018-63.772 236.324-193.827 271.172-15.225 4.08-30.173-7.437-30.173-23.199v-33.895c0-10.057 6.228-19.133 15.687-22.55C369.684 375.688 408 330.054 408 256h-72c-26.51 0-48-21.49-48-48V80c0-26.51 21.49-48 48-48h128c26.51 0 48 21.49 48 48zM176 32H48C21.49 32 0 53.49 0 80v128c0 26.51 21.49 48 48 48h72c0 74.054-38.316 119.688-104.313 143.528C6.228 402.945 0 412.021 0 422.078v33.895c0 15.762 14.948 27.279 30.173 23.199C160.228 444.324 224 345.018 224 208V80c0-26.51-21.49-48-48-48z" })));
-var linkIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "link", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
-    React.createElement("path", { fill: "currentColor", d: "M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z" })));
-var strikeThroughIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "strikethrough", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
-    React.createElement("path", { fill: "currentColor", d: "M496 288H16c-8.837 0-16-7.163-16-16v-32c0-8.837 7.163-16 16-16h480c8.837 0 16 7.163 16 16v32c0 8.837-7.163 16-16 16zm-214.666 16c27.258 12.937 46.524 28.683 46.524 56.243 0 33.108-28.977 53.676-75.621 53.676-32.325 0-76.874-12.08-76.874-44.271V368c0-8.837-7.164-16-16-16H113.75c-8.836 0-16 7.163-16 16v19.204c0 66.845 77.717 101.82 154.487 101.82 88.578 0 162.013-45.438 162.013-134.424 0-19.815-3.618-36.417-10.143-50.6H281.334zm-30.952-96c-32.422-13.505-56.836-28.946-56.836-59.683 0-33.92 30.901-47.406 64.962-47.406 42.647 0 64.962 16.593 64.962 32.985V136c0 8.837 7.164 16 16 16h45.613c8.836 0 16-7.163 16-16v-30.318c0-52.438-71.725-79.875-142.575-79.875-85.203 0-150.726 40.972-150.726 125.646 0 22.71 4.665 41.176 12.777 56.547h129.823z" })));
-var italicIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "italic", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 320 512", "data-fa-i2svg": "" },
-    React.createElement("path", { fill: "currentColor", d: "M204.758 416h-33.849l62.092-320h40.725a16 16 0 0 0 15.704-12.937l6.242-32C297.599 41.184 290.034 32 279.968 32H120.235a16 16 0 0 0-15.704 12.937l-6.242 32C96.362 86.816 103.927 96 113.993 96h33.846l-62.09 320H46.278a16 16 0 0 0-15.704 12.935l-6.245 32C22.402 470.815 29.967 480 40.034 480h158.479a16 16 0 0 0 15.704-12.935l6.245-32c1.927-9.88-5.638-19.065-15.704-19.065z" })));
-var headerIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "heading", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", "data-fa-i2svg": "" },
-    React.createElement("path", { fill: "currentColor", d: "M496 80V48c0-8.837-7.163-16-16-16H320c-8.837 0-16 7.163-16 16v32c0 8.837 7.163 16 16 16h37.621v128H154.379V96H192c8.837 0 16-7.163 16-16V48c0-8.837-7.163-16-16-16H32c-8.837 0-16 7.163-16 16v32c0 8.837 7.163 16 16 16h37.275v320H32c-8.837 0-16 7.163-16 16v32c0 8.837 7.163 16 16 16h160c8.837 0 16-7.163 16-16v-32c0-8.837-7.163-16-16-16h-37.621V288H357.62v128H320c-8.837 0-16 7.163-16 16v32c0 8.837 7.163 16 16 16h160c8.837 0 16-7.163 16-16v-32c0-8.837-7.163-16-16-16h-37.275V96H480c8.837 0 16-7.163 16-16z" })));
-var boldIcon = (React.createElement("svg", { className: "svg-icon", "aria-hidden": "true", "data-prefix": "fas", "data-icon": "bold", role: "img", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 384 512", "data-fa-i2svg": "" },
-    React.createElement("path", { fill: "currentColor", d: "M304.793 243.891c33.639-18.537 53.657-54.16 53.657-95.693 0-48.236-26.25-87.626-68.626-104.179C265.138 34.01 240.849 32 209.661 32H24c-8.837 0-16 7.163-16 16v33.049c0 8.837 7.163 16 16 16h33.113v318.53H24c-8.837 0-16 7.163-16 16V464c0 8.837 7.163 16 16 16h195.69c24.203 0 44.834-1.289 66.866-7.584C337.52 457.193 376 410.647 376 350.014c0-52.168-26.573-91.684-71.207-106.123zM142.217 100.809h67.444c16.294 0 27.536 2.019 37.525 6.717 15.828 8.479 24.906 26.502 24.906 49.446 0 35.029-20.32 56.79-53.029 56.79h-76.846V100.809zm112.642 305.475c-10.14 4.056-22.677 4.907-31.409 4.907h-81.233V281.943h84.367c39.645 0 63.057 25.38 63.057 63.057.001 28.425-13.66 52.483-34.782 61.284z" })));
-var SvgIcon = function (_a) {
-    var icon = _a.icon;
-    switch (icon) {
-        case "header":
-            return headerIcon;
-        case "bold":
-            return boldIcon;
-        case "italic":
-            return italicIcon;
-        case "strikethrough":
-            return strikeThroughIcon;
-        case "link":
-            return linkIcon;
-        case "quote":
-            return quoteIcon;
-        case "code":
-            return codeIcon;
-        case "image":
-            return imageIcon;
-        case "unordered-list":
-            return unorderedListIcon;
-        case "ordered-list":
-            return orderedListIcon;
-        case "checked-list":
-            return checkedListIcon;
-        default:
-            return null;
-    }
-};
-exports.SvgIcon = SvgIcon;
-
-
-/***/ }),
-/* 58 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.enL18n = void 0;
-exports.enL18n = {
-    write: "Write",
-    preview: "Preview",
-    uploadingImage: "Uploading image...",
-    pasteDropSelect: "Attach files by dragging & dropping, selecting or pasting them."
-};
-
-
-/***/ }),
-/* 59 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.mod = void 0;
-/**
- * Calculates modulus, like %, except that it works with negative numbers
- */
-function mod(n, m) {
-    return ((n % m) + m) % m;
-}
-exports.mod = mod;
-
-
-/***/ }),
-/* 60 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-/* jshint browser: true */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCaretCoordinates = void 0;
-// We'll copy the properties below into the mirror div.
-// Note that some browsers, such as Firefox, do not concatenate properties
-// into their shorthand (e.g. padding-top, padding-bottom etc. -> padding),
-// so we have to list every single property explicitly.
-var properties = [
-    "direction",
-    "boxSizing",
-    "width",
-    "height",
-    "overflowX",
-    "overflowY",
-    "borderTopWidth",
-    "borderRightWidth",
-    "borderBottomWidth",
-    "borderLeftWidth",
-    "borderStyle",
-    "paddingTop",
-    "paddingRight",
-    "paddingBottom",
-    "paddingLeft",
-    // https://developer.mozilla.org/en-US/docs/Web/CSS/font
-    "fontStyle",
-    "fontVariant",
-    "fontWeight",
-    "fontStretch",
-    "fontSize",
-    "fontSizeAdjust",
-    "lineHeight",
-    "fontFamily",
-    "textAlign",
-    "textTransform",
-    "textIndent",
-    "textDecoration",
-    "letterSpacing",
-    "wordSpacing",
-    "tabSize",
-    "MozTabSize"
-];
-var isBrowser = typeof window !== "undefined";
-var isFirefox = isBrowser && window.mozInnerScreenX != null;
-function getCaretCoordinates(element, append) {
-    if (!isBrowser) {
-        throw new Error("getCaretCoordinates should only be called in a browser");
-    }
-    // The mirror div will replicate the textarea's style
-    var div = document.createElement("div");
-    div.id = "input-textarea-caret-position-mirror-div";
-    document.body.appendChild(div);
-    var style = div.style;
-    var computed = window.getComputedStyle
-        ? window.getComputedStyle(element)
-        : element.currentStyle; // currentStyle for IE < 9
-    // Default textarea styles
-    style.whiteSpace = "pre-wrap";
-    style.wordWrap = "break-word"; // only for textarea-s
-    // Position off-screen
-    style.position = "absolute"; // required to return coordinates properly
-    style.visibility = "hidden"; // not 'display: none' because we want rendering
-    // Transfer the element's properties to the div
-    properties.forEach(function (prop) {
-        style[prop] = computed[prop];
-    });
-    if (isFirefox) {
-        // Firefox lies about the overflow property for textareas: https://bugzilla.mozilla.org/show_bug.cgi?id=984275
-        if (element.scrollHeight > parseInt(computed.height))
-            style.overflowY = "scroll";
-    }
-    else {
-        style.overflow = "hidden"; // for Chrome to not render a scrollbar; IE keeps overflowY = 'scroll'
-    }
-    div.textContent = element.value.substring(0, element.selectionStart);
-    if (append) {
-        div.textContent += append;
-    }
-    var span = document.createElement("span");
-    // Wrapping must be replicated *exactly*, including when a long word gets
-    // onto the next line, with whitespace at the end of the line before (#7).
-    // The  *only* reliable way to do that is to copy the *entire* rest of the
-    // textarea's content into the <span> created at the caret position.
-    // For inputs, just '.' would be enough, but no need to bother.
-    span.textContent = element.value.substring(element.selectionEnd) || "."; // || because a completely empty faux span doesn't render at all
-    div.appendChild(span);
-    var coordinates = {
-        top: span.offsetTop + parseInt(computed["borderTopWidth"]),
-        left: span.offsetLeft + parseInt(computed["borderLeftWidth"]),
-        lineHeight: parseInt(computed["lineHeight"])
-    };
-    document.body.removeChild(div);
-    return coordinates;
-}
-exports.getCaretCoordinates = getCaretCoordinates;
-
-
-/***/ }),
-/* 61 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.readFileAsync = void 0;
-/**
- * Reads a file and returns an ArrayBuffer
- * @param file
- */
-function readFileAsync(file) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/, new Promise(function (resolve, reject) {
-                    var reader = new FileReader();
-                    reader.onload = function () {
-                        if (typeof reader.result === "string") {
-                            throw new Error("reader.result is expected to be an ArrayBuffer");
-                        }
-                        resolve(reader.result);
-                    };
-                    reader.onerror = reject;
-                    reader.readAsArrayBuffer(file);
-                })];
-        });
-    });
-}
-exports.readFileAsync = readFileAsync;
-
-
-/***/ }),
 /* 62 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_split_js__ = __webpack_require__(64);
+/* WEBPACK VAR INJECTION */(function(process) {
 
+if (process.env.NODE_ENV === 'production') {
+  module.exports = __webpack_require__(59);
+} else {
+  module.exports = __webpack_require__(58);
+}
 
-
-
-function objectWithoutProperties (obj, exclude) { var target = {}; for (var k in obj) if (Object.prototype.hasOwnProperty.call(obj, k) && exclude.indexOf(k) === -1) target[k] = obj[k]; return target; }
-
-var SplitWrapper = /*@__PURE__*/(function (superclass) {
-    function SplitWrapper () {
-        superclass.apply(this, arguments);
-    }
-
-    if ( superclass ) SplitWrapper.__proto__ = superclass;
-    SplitWrapper.prototype = Object.create( superclass && superclass.prototype );
-    SplitWrapper.prototype.constructor = SplitWrapper;
-
-    SplitWrapper.prototype.componentDidMount = function componentDidMount () {
-        var ref = this.props;
-        ref.children;
-        var gutter = ref.gutter;
-        var rest = objectWithoutProperties( ref, ["children", "gutter"] );
-        var options = rest;
-
-        options.gutter = function (index, direction) {
-            var gutterElement;
-
-            if (gutter) {
-                gutterElement = gutter(index, direction);
-            } else {
-                gutterElement = document.createElement('div');
-                gutterElement.className = "gutter gutter-" + direction;
-            }
-
-            // eslint-disable-next-line no-underscore-dangle
-            gutterElement.__isSplitGutter = true;
-            return gutterElement
-        };
-
-        this.split = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_split_js__["a" /* default */])(this.parent.children, options);
-    };
-
-    SplitWrapper.prototype.componentDidUpdate = function componentDidUpdate (prevProps) {
-        var this$1 = this;
-
-        var ref = this.props;
-        ref.children;
-        var minSize = ref.minSize;
-        var sizes = ref.sizes;
-        var collapsed = ref.collapsed;
-        var rest = objectWithoutProperties( ref, ["children", "minSize", "sizes", "collapsed"] );
-        var options = rest;
-        var prevMinSize = prevProps.minSize;
-        var prevSizes = prevProps.sizes;
-        var prevCollapsed = prevProps.collapsed;
-
-        var otherProps = [
-            'maxSize',
-            'expandToMin',
-            'gutterSize',
-            'gutterAlign',
-            'snapOffset',
-            'dragInterval',
-            'direction',
-            'cursor' ];
-
-        var needsRecreate = otherProps
-            // eslint-disable-next-line react/destructuring-assignment
-            .map(function (prop) { return this$1.props[prop] !== prevProps[prop]; })
-            .reduce(function (accum, same) { return accum || same; }, false);
-
-        // Compare minSize when both are arrays, when one is an array and when neither is an array
-        if (Array.isArray(minSize) && Array.isArray(prevMinSize)) {
-            var minSizeChanged = false;
-
-            minSize.forEach(function (minSizeI, i) {
-                minSizeChanged = minSizeChanged || minSizeI !== prevMinSize[i];
-            });
-
-            needsRecreate = needsRecreate || minSizeChanged;
-        } else if (Array.isArray(minSize) || Array.isArray(prevMinSize)) {
-            needsRecreate = true;
-        } else {
-            needsRecreate = needsRecreate || minSize !== prevMinSize;
-        }
-
-        // Destroy and re-create split if options changed
-        if (needsRecreate) {
-            options.minSize = minSize;
-            options.sizes = sizes || this.split.getSizes();
-            this.split.destroy(true, true);
-            options.gutter = function (index, direction, pairB) { return pairB.previousSibling; };
-            this.split = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2_split_js__["a" /* default */])(
-                Array.from(this.parent.children).filter(
-                    // eslint-disable-next-line no-underscore-dangle
-                    function (element) { return !element.__isSplitGutter; }
-                ),
-                options
-            );
-        } else if (sizes) {
-            // If only the size has changed, set the size. No need to do this if re-created.
-            var sizeChanged = false;
-
-            sizes.forEach(function (sizeI, i) {
-                sizeChanged = sizeChanged || sizeI !== prevSizes[i];
-            });
-
-            if (sizeChanged) {
-                // eslint-disable-next-line react/destructuring-assignment
-                this.split.setSizes(this.props.sizes);
-            }
-        }
-
-        // Collapse after re-created or when collapsed changed.
-        if (
-            Number.isInteger(collapsed) &&
-            (collapsed !== prevCollapsed || needsRecreate)
-        ) {
-            this.split.collapse(collapsed);
-        }
-    };
-
-    SplitWrapper.prototype.componentWillUnmount = function componentWillUnmount () {
-        this.split.destroy();
-        delete this.split;
-    };
-
-    SplitWrapper.prototype.render = function render () {
-        var this$1 = this;
-
-        var ref = this.props;
-        ref.sizes;
-        ref.minSize;
-        ref.maxSize;
-        ref.expandToMin;
-        ref.gutterSize;
-        ref.gutterAlign;
-        ref.snapOffset;
-        ref.dragInterval;
-        ref.direction;
-        ref.cursor;
-        ref.gutter;
-        ref.elementStyle;
-        ref.gutterStyle;
-        ref.onDrag;
-        ref.onDragStart;
-        ref.onDragEnd;
-        ref.collapsed;
-        var children = ref.children;
-        var rest$1 = objectWithoutProperties( ref, ["sizes", "minSize", "maxSize", "expandToMin", "gutterSize", "gutterAlign", "snapOffset", "dragInterval", "direction", "cursor", "gutter", "elementStyle", "gutterStyle", "onDrag", "onDragStart", "onDragEnd", "collapsed", "children"] );
-        var rest = rest$1;
-
-        return (
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement( 'div', Object.assign({},
-                { ref: function (parent) {
-                    this$1.parent = parent;
-                } }, rest),
-                children
-            )
-        )
-    };
-
-    return SplitWrapper;
-}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component));
-
-SplitWrapper.propTypes = {
-    sizes: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number),
-    minSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.oneOfType([
-        __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-        __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number) ]),
-    maxSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.oneOfType([
-        __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-        __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number) ]),
-    expandToMin: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
-    gutterSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    gutterAlign: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
-    snapOffset: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    dragInterval: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    direction: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
-    cursor: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
-    gutter: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-    elementStyle: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-    gutterStyle: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-    onDrag: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-    onDragStart: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-    onDragEnd: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-    collapsed: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    children: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.element),
-};
-
-SplitWrapper.defaultProps = {
-    sizes: undefined,
-    minSize: undefined,
-    maxSize: undefined,
-    expandToMin: undefined,
-    gutterSize: undefined,
-    gutterAlign: undefined,
-    snapOffset: undefined,
-    dragInterval: undefined,
-    direction: undefined,
-    cursor: undefined,
-    gutter: undefined,
-    elementStyle: undefined,
-    gutterStyle: undefined,
-    onDrag: undefined,
-    onDragStart: undefined,
-    onDragEnd: undefined,
-    collapsed: undefined,
-    children: undefined,
-};
-
-/* harmony default export */ __webpack_exports__["default"] = (SplitWrapper);
-
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
 /* 63 */
